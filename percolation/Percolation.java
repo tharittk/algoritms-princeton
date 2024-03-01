@@ -44,22 +44,22 @@ public class Percolation {
             idx = (col - 1) + nCol * (row - 1);
 
             // edge case: top-left corner
-            if (row == 1 && col == 1){
+            if (row == 1 && col == 1) {
                 leftBlockExist = false;
                 topBlockExist = false;
             }
             // edge case: top-right corner
-            if (row == 1 && col == nCol){
+            if (row == 1 && col == nCol) {
                 rightBlockExist = false;
                 topBlockExist = false;
             }
             // edge case: bottom-left corner
-            if (row == nCol && col == 1){
+            if (row == nCol && col == 1) {
                 leftBlockExist = false;
                 bottomBlockExist = false;
             }
             // edge case: bottom-right corner
-            if (row == nCol && col == nCol){
+            if (row == nCol && col == nCol) {
                 rightBlockExist = false;
                 bottomBlockExist = false;
             }
@@ -67,33 +67,51 @@ public class Percolation {
             if (col == 1) leftBlockExist = false;
             if (col == nCol) rightBlockExist = false;
 
-            if (row == 1){
+            if (row == 1) {
                 topBlockExist = false;
                 uf.union(virtualTopIndex, idx);
             }
-            if (row == nCol){
+            if (row == nCol) {
                 bottomBlockExist = false;
-                uf.union(virtualBottomIndex, idx);
+                // uf.union(virtualBottomIndex, idx);
             }
+
             // union with 4 neighbors
             grid[idx] = 1;
 
-            if (topBlockExist){
+            if (topBlockExist) {
                 idxTopBlock = (col - 1) + nCol * (row - 2);
-                uf.union(idxTopBlock, idx);
+                if (isOpen(row - 1, col)) uf.union(idxTopBlock, idx);
             }
-            if (leftBlockExist){
-                idxleftBlock = (col - 2) + nCol * (row - 1);
-                uf.union(idxLeftBlock, idx);
+            if (leftBlockExist) {
+                idxLeftBlock = (col - 2) + nCol * (row - 1);
+                if (isOpen(row, col - 1)) uf.union(idxLeftBlock, idx);
             }
-            if (rightBlockExist){
+            if (rightBlockExist) {
                 idxRightBlock = (col) + nCol * (row - 1);
-                uf.union(idxRightBlock, idx);
+                if (isOpen(row, col + 1)) uf.union(idxRightBlock, idx);
             }
-            if (bottomBlockExist){
-                idxBottomBlock = (col-1) + nCol * (row);
-                uf.union(idxBottomBlock, idx);
+            if (bottomBlockExist) {
+                idxBottomBlock = (col - 1) + nCol * (row);
+                if (isOpen(row + 1, col)) uf.union(idxBottomBlock, idx);
             }
+
+            // last row -- O(n) SLOW
+            for (int iCol = 0; iCol < nCol; iCol++) {
+                int tmp = (iCol - 1) + nCol * (nCol - 1);
+                if (grid[tmp] == 1) {
+                    if (uf.find(virtualTopIndex) == uf.find(tmp)) {
+                        uf.union(virtualBottomIndex, tmp);
+                    }
+                }
+            }
+            // connect to virtual bottom
+            // this should also trigger if click any block in between and then make the grid percolate
+            // if (row == nCol) {
+            //     if (uf.find(virtualTopIndex) == uf.find(idx)) {
+            //         uf.union(virtualBottomIndex, idx);
+            //     }
+            // }
             count++;
         }
     }
@@ -115,6 +133,7 @@ public class Percolation {
         }
         int idx;
         idx = (col - 1) + nCol * (row - 1);
+
         return uf.find(idx) == uf.find(virtualTopIndex);
     }
 
