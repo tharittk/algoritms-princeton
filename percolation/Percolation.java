@@ -6,7 +6,7 @@ public class Percolation {
     private int count;
     private int nCol;
     private WeightedQuickUnionUF uf;
-    private int[] grid;
+    public int[] grid;
     private int virtualTopIndex;
     private int virtualBottomIndex;
 
@@ -23,7 +23,7 @@ public class Percolation {
 
         grid = new int[n * n];
         for (int i = 0; i < n * n; i++) {
-            grid[i] = 0;
+            grid[i] = 1;
         }
     }
 
@@ -77,7 +77,7 @@ public class Percolation {
             }
 
             // union with 4 neighbors
-            grid[idx] = 1;
+            grid[idx] = 0;
 
             if (topBlockExist) {
                 idxTopBlock = (col - 1) + nCol * (row - 2);
@@ -99,7 +99,7 @@ public class Percolation {
             // last row -- O(n) SLOW
             for (int iCol = 0; iCol < nCol; iCol++) {
                 int tmp = (iCol - 1) + nCol * (nCol - 1);
-                if (grid[tmp] == 1) {
+                if (grid[tmp] == 0) {
                     if (uf.find(virtualTopIndex) == uf.find(tmp)) {
                         uf.union(virtualBottomIndex, tmp);
                     }
@@ -123,7 +123,7 @@ public class Percolation {
         }
         int idx;
         idx = (col - 1) + nCol * (row - 1);
-        return grid[idx] == 1;
+        return grid[idx] == 0;
     }
 
     // is the site (row, col) full?

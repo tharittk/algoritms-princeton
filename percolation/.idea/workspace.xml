@@ -85,11 +85,17 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
-  <component name="RunManager" selected="Application.InteractivePercolationVisualizer">
+  <component name="RunManager" selected="Application.PercolationStats">
     <configuration name="InteractivePercolationVisualizer" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="InteractivePercolationVisualizer" />
       <module name="Algorithms, Part I" />
       <option name="PROGRAM_PARAMETERS" value="3" />
+      <method v="2" />
+    </configuration>
+    <configuration name="PercolationStats" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="PercolationStats" />
+      <module name="Algorithms, Part I" />
+      <option name="PROGRAM_PARAMETERS" value="3 1000" />
       <method v="2" />
     </configuration>
     <configuration name="PercolationVisualizer" type="Application" factoryName="Application">
