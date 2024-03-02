@@ -1,21 +1,26 @@
 public class PercolationStats {
     // perform independent trials on an n-by-n grid
     private double[] thrsholds;
-    private int T;
+    private int numTrial;
 
     public PercolationStats(int n, int trials) {
         thrsholds = new double[trials];
-        T = trials;
+        numTrial = trials;
         for (int i = 0; i < trials; i++) {
-            int idxToOpen;
-
-            int iRow, iCol;
+            int rowToOpen;
+            int colToOpen;
             Percolation perc = new Percolation(n);
             while (!perc.percolates()) {
-                idxToOpen = edu.princeton.cs.algs4.StdRandom.discrete(perc.grid);
-                iRow = (idxToOpen / n) + 1;
-                iCol = idxToOpen - ((n) * (iRow - 1)) + 1;
-                perc.open(iRow, iCol);
+
+                rowToOpen = edu.princeton.cs.algs4.StdRandom.uniformInt(n) + 1;
+                colToOpen = edu.princeton.cs.algs4.StdRandom.uniformInt(n) + 1;
+
+                while (perc.isOpen(rowToOpen, colToOpen)) {
+                    rowToOpen = edu.princeton.cs.algs4.StdRandom.uniformInt(n) + 1;
+                    colToOpen = edu.princeton.cs.algs4.StdRandom.uniformInt(n) + 1;
+                }
+
+                perc.open(rowToOpen, colToOpen);
             }
             thrsholds[i] = ((double) perc.numberOfOpenSites()) / ((double) n * n);
         }
@@ -35,14 +40,14 @@ public class PercolationStats {
     public double confidenceLo() {
         double mu = mean();
         double std = stddev();
-        return mu - (1.96 * std / Math.sqrt(T));
+        return mu - (1.96 * std / Math.sqrt(numTrial));
     }
 
     // high endpoint of 95% confidence interval
     public double confidenceHi() {
         double mu = mean();
         double std = stddev();
-        return mu + (1.96 * std / Math.sqrt(T));
+        return mu + (1.96 * std / Math.sqrt(numTrial));
     }
 
     // test client (see below)

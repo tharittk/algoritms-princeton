@@ -6,7 +6,7 @@ public class Percolation {
     private int count;
     private int nCol;
     private WeightedQuickUnionUF uf;
-    public int[] grid;
+    private int[] grid;
     private int virtualTopIndex;
     private int virtualBottomIndex;
 
@@ -73,7 +73,7 @@ public class Percolation {
             }
             if (row == nCol) {
                 bottomBlockExist = false;
-                // uf.union(virtualBottomIndex, idx);
+                uf.union(virtualBottomIndex, idx);
             }
 
             // union with 4 neighbors
@@ -97,14 +97,14 @@ public class Percolation {
             }
 
             // last row -- O(n) SLOW
-            for (int iCol = 0; iCol < nCol; iCol++) {
-                int tmp = (iCol - 1) + nCol * (nCol - 1);
-                if (grid[tmp] == 0) {
-                    if (uf.find(virtualTopIndex) == uf.find(tmp)) {
-                        uf.union(virtualBottomIndex, tmp);
-                    }
-                }
-            }
+            // for (int iCol = 0; iCol < nCol; iCol++) {
+            //     int tmp = (iCol - 1) + nCol * (nCol - 1);
+            //     if (grid[tmp] == 0) {
+            //         if (uf.find(virtualTopIndex) == uf.find(tmp)) {
+            //             uf.union(virtualBottomIndex, tmp);
+            //         }
+            //     }
+            // }
             // connect to virtual bottom
             // this should also trigger if click any block in between and then make the grid percolate
             // if (row == nCol) {
@@ -144,6 +144,8 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
+        // fix graphic
+
         return uf.find(virtualTopIndex) == uf.find(virtualBottomIndex);
     }
 
