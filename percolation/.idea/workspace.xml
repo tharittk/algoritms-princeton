@@ -89,13 +89,13 @@
     <configuration name="InteractivePercolationVisualizer" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="InteractivePercolationVisualizer" />
       <module name="Algorithms, Part I" />
-      <option name="PROGRAM_PARAMETERS" value="3" />
+      <option name="PROGRAM_PARAMETERS" value="4" />
       <method v="2" />
     </configuration>
     <configuration name="PercolationStats" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="PercolationStats" />
       <module name="Algorithms, Part I" />
-      <option name="PROGRAM_PARAMETERS" value="2 100000" />
+      <option name="PROGRAM_PARAMETERS" value="200 100" />
       <method v="2" />
     </configuration>
     <configuration name="PercolationVisualizer" type="Application" factoryName="Application">

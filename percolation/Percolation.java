@@ -6,7 +6,7 @@ public class Percolation {
     private int count;
     private int nCol;
     private WeightedQuickUnionUF uf;
-    private int[] grid;
+    private boolean[] isClosedGrid;
     private int virtualTopIndex;
     private int virtualBottomIndex;
 
@@ -21,15 +21,15 @@ public class Percolation {
         virtualTopIndex = (n * n + 2) - 2;
         virtualBottomIndex = (n * n + 2) - 1;
 
-        grid = new int[n * n];
+        isClosedGrid = new boolean[n * n];
         for (int i = 0; i < n * n; i++) {
-            grid[i] = 1;
+            isClosedGrid[i] = true;
         }
     }
 
     // opens the site (row, col) if it is not open already
     public void open(int row, int col) {
-        if (row > nCol || col > nCol) {
+        if (row > nCol || col > nCol || row <= 0 || col <= 0) {
             throw new IllegalArgumentException("Row or Column exceeds range");
         }
         boolean leftBlockExist = true;
@@ -41,7 +41,7 @@ public class Percolation {
 
         if (!isOpen(row, col)) {
 
-            idx = (col - 1) + nCol * (row - 1);
+            idx = convertRowColToIndex(row, col);
 
             // edge case: top-left corner
             if (row == 1 && col == 1) {
@@ -77,22 +77,22 @@ public class Percolation {
             }
 
             // union with 4 neighbors
-            grid[idx] = 0;
+            isClosedGrid[idx] = false;
 
             if (topBlockExist) {
-                idxTopBlock = (col - 1) + nCol * (row - 2);
+                idxTopBlock = convertRowColToIndex(row - 1, col);
                 if (isOpen(row - 1, col)) uf.union(idxTopBlock, idx);
             }
             if (leftBlockExist) {
-                idxLeftBlock = (col - 2) + nCol * (row - 1);
+                idxLeftBlock = convertRowColToIndex(row, col - 1);
                 if (isOpen(row, col - 1)) uf.union(idxLeftBlock, idx);
             }
             if (rightBlockExist) {
-                idxRightBlock = (col) + nCol * (row - 1);
+                idxRightBlock = convertRowColToIndex(row, col + 1);
                 if (isOpen(row, col + 1)) uf.union(idxRightBlock, idx);
             }
             if (bottomBlockExist) {
-                idxBottomBlock = (col - 1) + nCol * (row);
+                idxBottomBlock = convertRowColToIndex(row + 1, col);
                 if (isOpen(row + 1, col)) uf.union(idxBottomBlock, idx);
             }
 
@@ -118,21 +118,21 @@ public class Percolation {
 
     // is the site (row, col) open?
     public boolean isOpen(int row, int col) {
-        if (row > nCol || col > nCol) {
+        if (row > nCol || col > nCol || row <= 0 || col <= 0) {
             throw new IllegalArgumentException("Row or Column exceeds range");
         }
         int idx;
-        idx = (col - 1) + nCol * (row - 1);
-        return grid[idx] == 0;
+        idx = convertRowColToIndex(row, col);
+        return !isClosedGrid[idx];
     }
 
     // is the site (row, col) full?
     public boolean isFull(int row, int col) {
-        if (row > nCol || col > nCol) {
+        if (row > nCol || col > nCol || row <= 0 || col <= 0) {
             throw new IllegalArgumentException("Row or Column exceeds range");
         }
         int idx;
-        idx = (col - 1) + nCol * (row - 1);
+        idx = convertRowColToIndex(row, col);
 
         return uf.find(idx) == uf.find(virtualTopIndex);
     }
@@ -147,6 +147,10 @@ public class Percolation {
         // fix graphic
 
         return uf.find(virtualTopIndex) == uf.find(virtualBottomIndex);
+    }
+
+    private int convertRowColToIndex(int row, int col) {
+        return (col - 1) + nCol * (row - 1);
     }
 
     // test client (optional)
