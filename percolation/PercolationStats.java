@@ -1,5 +1,5 @@
 public class PercolationStats {
-    static final double CONFIDENCE_95 = 1.96;
+    private static final double CONFIDENCE_95 = 1.96;
     // perform independent trials on an n-by-n grid
     private double[] thrsholds;
     private int numTrial;
