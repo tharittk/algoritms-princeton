@@ -4,7 +4,7 @@
  *  Description:
  **************************************************************************** */
 
-import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -148,28 +148,109 @@ public class Deque<Item> implements Iterable<Item> {
 
     // unit testing (required)
     public static void main(String[] args) {
-        Deque deque = new Deque();
-        String s, snext, sout;
-        while (!StdIn.isEmpty()) {
-            s = StdIn.readString();
-            if (s.equals(">")) {
-                snext = StdIn.readString();
-                deque.addFirst(snext);
-            }
-            if (s.equals(")")) {
-                sout = (String) deque.removeFirst();
-                System.out.println("Pop first: " + sout);
-            }
-            if (s.equals("<")) {
-                snext = StdIn.readString();
-                deque.addLast(snext);
-            }
-            if (s.equals("(")) {
-                sout = (String) deque.removeLast();
-                System.out.println("Pop last: " + sout);
-            }
 
+        int testOut;
+        // Test 1: isEmpty
+
+        System.out.println("======== Test 1: isEmpty =======");
+        Deque<Integer> deque1 = new Deque<Integer>();
+
+        if (deque1.isEmpty()) System.out.println("deck is empty (expected)");
+        else System.out.println("Something wrong, deck should be empty");
+
+        deque1.addFirst(1);
+        if (deque1.isEmpty()) System.out.println("Something wrong, deck should NOT be empty\"");
+        else System.out.println("OK deck not empty");
+
+        // Test 2: addFirst from empty
+        System.out.println("======== Test 2: addFirst =======");
+        Deque<Integer> deque2 = new Deque<Integer>();
+        deque2.addFirst(1);
+        testOut = deque2.removeFirst();
+
+        System.out.println("Expected 1: Printout: " + testOut);
+        if (deque2.isEmpty()) System.out.println("deck is empty (expected)");
+        else System.out.println("Something wrong, deck should be empty");
+
+        // System.out.println("Should throw error from popping empty");
+        // testOut = (int) deque.removeFirst();
+
+        deque2.addFirst(1);
+        deque2.addFirst(2);
+        testOut = deque2.removeFirst();
+        System.out.println("Expected 2: Printout: " + testOut);
+
+        // Test 3: addLast from empty
+        System.out.println("======== Test 3: addLast =======");
+        Deque<Integer> deque3 = new Deque<Integer>();
+        deque3.addLast(2);
+        testOut = deque3.removeLast();
+        System.out.println("Expected 2: Printout: " + testOut);
+
+        if (deque3.isEmpty()) System.out.println("deck is empty (expected)");
+        else System.out.println("Something wrong, deck should be empty");
+
+        deque3.addFirst(3);
+        deque3.addLast(4);
+        testOut = deque3.removeLast();
+        System.out.println("Expected 4: Printout: " + testOut);
+
+        System.out.println("======== Test 4: removeFirst =======");
+        Deque<Integer> deque4 = new Deque<Integer>();
+        deque4.addFirst(1);
+        deque4.addFirst(0);
+        deque4.addLast(2);
+        testOut = deque4.removeFirst();
+        System.out.println("Expected 0: Printout: " + testOut);
+        testOut = deque4.removeFirst();
+        System.out.println("Expected 1: Printout: " + testOut);
+        testOut = deque4.removeFirst();
+        System.out.println("Expected 2: Printout: " + testOut);
+
+        System.out.println("======== Test 5: removeLast =======");
+        Deque<Integer> deque5 = new Deque<Integer>();
+        deque5.addLast(1);
+        deque5.addLast(2);
+        deque5.addFirst(0);
+
+        testOut = deque5.removeLast();
+        System.out.println("Expected 2: Printout: " + testOut);
+        testOut = deque5.removeLast();
+        System.out.println("Expected 1: Printout: " + testOut);
+        testOut = deque5.removeLast();
+        System.out.println("Expected 0: Printout: " + testOut);
+
+        System.out.println("======== Test 6: size =======");
+        Deque<Integer> deque6 = new Deque<Integer>();
+        testOut = deque6.size();
+        System.out.println("Init size expected 0: Printout: " + testOut);
+        deque6.addFirst(1);
+        testOut = deque6.size();
+        System.out.println("size expected 1: Printout: " + testOut);
+        deque6.addLast(2);
+        testOut = deque6.size();
+        System.out.println("size expected 2: Printout: " + testOut);
+        deque6.removeFirst();
+        testOut = deque6.size();
+        System.out.println("size expected 1: Printout: " + testOut);
+        deque6.addLast(2);
+        deque6.removeLast();
+        System.out.println("size expected 1: Printout: " + testOut);
+
+        System.out.println("======== Test 7: Iterator =======");
+        Deque<Integer> deque7 = new Deque<Integer>();
+        deque7.addFirst(3);
+        deque7.addFirst(2);
+        deque7.addLast(4);
+
+        Iterator<Integer> it = deque7.iterator();
+
+        System.out.println("Expect 2 3 4:");
+        while (it.hasNext()) {
+            int i = it.next();
+            StdOut.println(i);
         }
+
 
     }
 
