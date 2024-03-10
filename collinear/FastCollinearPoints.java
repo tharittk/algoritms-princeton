@@ -98,34 +98,24 @@ public class FastCollinearPoints {
 
     // the line segments
     public LineSegment[] segments() {
-        // LineSegment[] segments = new LineSegment[arrayListLineSegments.size()];
-        // int i = 0;
-        // for (LineSegment segment : arrayListLineSegments) {
-        //     segments[i] = segment;
-        //     i++;
-        // }
-        // return segments;
 
-        // reconstruct from point pair;
-        // System.out.println("Calling segment");
-        ArrayList<Point> usedPoint = new ArrayList<Point>();
 
-        // int[] usedPoints = new int[arrayListPointPair.size()];
+        ArrayList<Integer> hashedUsedPair = new ArrayList<Integer>();
 
         // System.out.println("Total Pairs: " + arrayListPointPair.size() / 2);
         for (int i = 0; i < arrayListPointPair.size(); i += 2) {
             Point p = arrayListPointPair.get(i);
             Point q = arrayListPointPair.get(i + 1);
 
-            if (!usedPoint.contains(p) && !usedPoint.contains(q)) {
+            int hashP = System.identityHashCode(p);
+            int hashQ = System.identityHashCode(q);
+            int hashCode = 3 * hashP + 7 * hashQ;
+
+            if (!hashedUsedPair.contains(hashCode)) {
                 arrayListLineSegments.add(new LineSegment(p, q));
-                usedPoint.add(p);
-                usedPoint.add(q);
+                hashedUsedPair.add(hashCode);
             }
-            else {
-                usedPoint.add(p);
-                usedPoint.add(q);
-            }
+
         }
 
         LineSegment[] segments = new LineSegment[arrayListLineSegments.size()];
