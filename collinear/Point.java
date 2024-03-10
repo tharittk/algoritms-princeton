@@ -158,11 +158,11 @@ public class Point implements Comparable<Point> {
         System.out.println("Expected: 2.0, get: " + slope);
 
         // Test 5: Negative Slope
-        p1 = new Point(1, 8);
+        p1 = new Point(1, 9);
         p2 = new Point(4, 2);
         slope = p1.slopeTo(p2);
         System.out.println("====Test 5: Negative Slope ====");
-        System.out.println("Expected: -2.0, get: " + slope);
+        System.out.println("Expected: -1.5, get: " + slope);
     }
 
     private static void testSlopeOrder() {

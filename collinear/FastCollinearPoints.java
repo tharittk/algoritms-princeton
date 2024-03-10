@@ -31,6 +31,7 @@ public class FastCollinearPoints {
 
 
         for (Point p : points) {
+            System.out.println("=======================Point: " + p + "==================");
             Comparator<Point> slopeComparator = p.slopeOrder();
             Arrays.sort(pointsCopy, slopeComparator);
             int i;
@@ -40,45 +41,52 @@ public class FastCollinearPoints {
             // search for consecutive points
             double currentSlope, prevSlope;
             int nConsecutive = 1;
-            i = 1;
-            while (i < (points.length - 1)) {
-                // System.out.println("in while: " + i);
+
+            for (i = 1; i < points.length; i++) {
                 prevSlope = slopesToP[i - 1];
                 currentSlope = slopesToP[i];
+
                 boolean isSlopeEqual = (Double.compare(prevSlope, currentSlope) == 0);
+
+                // // debug
+                if (currentSlope == Double.POSITIVE_INFINITY) {
+                    System.out.println(
+                            ">>>>>>>>>>>>>>>" + pointsCopy[i]
+                                    + "Vertical to P: Before update nSec: "
+                                    + nConsecutive + "with prevSlope: " + prevSlope
+                                    + "| current slope: " + currentSlope + "isEQ: " + isSlopeEqual);
+                }
+
                 // go on
-                if (isSlopeEqual) {
-                    nConsecutive++;
-                }
-                // reset
-                if (nConsecutive < 3 && !isSlopeEqual) {
-                    nConsecutive = 1;
-                }
+                if (isSlopeEqual) nConsecutive++;
+
+                if (nConsecutive < 3 && !isSlopeEqual) nConsecutive = 1;
                 // reset but found at least 3 consecutive
+
                 if (nConsecutive >= 3 && !isSlopeEqual) {
+                    System.out.println("Collect for output for point: " + p);
                     // must do constant operation
-                    // ?
                     Point[] validPoints = new Point[nConsecutive + 1];
                     validPoints[0] = p;
                     for (int j = 1; j <= nConsecutive; j++) {
                         validPoints[j] = pointsCopy[i - j];
+                        // System.out.println("valid point: " + validPoints[j]);
                     }
                     Arrays.sort(validPoints);
-
                     arrayListPointPair.add(validPoints[0]);
                     arrayListPointPair.add(validPoints[nConsecutive]);
 
-                    // LineSegment newSegment = new LineSegment(validPoints[0],
-                    //                                          validPoints[nConsecutive]);
-                    // if (!arrayListLineSegments.contains(newSegment)) {
-                    //     arrayListLineSegments.add(newSegment);
-                    // }
                     nConsecutive = 1;
                 }
-                i++;
+
+                if (currentSlope == Double.POSITIVE_INFINITY) {
+                    System.out.println("After update: nSec = " + nConsecutive + "i = " + i);
+                }
+
             }
+
+
         }
-        // System.out.println("DONE WITH CTOR");
 
     }
 
