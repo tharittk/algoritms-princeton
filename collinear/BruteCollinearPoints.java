@@ -24,29 +24,32 @@ public class BruteCollinearPoints {
 
         for (int i = 0; i < points.length; i++) {
             for (int j = i + 1; j < points.length; j++) {
+
+                Point p = points[i];
+                Point q = points[j];
+                // repeated point check
+                int comparePQ = p.compareTo(q);
+                if (comparePQ == 0)
+                    throw new IllegalArgumentException("repeated points exists");
+
                 for (int k = j + 1; k < points.length; k++) {
+                    Point r = points[k];
+                    // repeated point check
+                    int comparePR = p.compareTo(r);
+                    int compareQR = q.compareTo(r);
+                    if (comparePR == 0 || compareQR == 0)
+                        throw new IllegalArgumentException("repeated points exists");
+
                     for (int m = k + 1; m < points.length; m++) {
 
-                        Point p = points[i];
-                        Point q = points[j];
-                        Point r = points[k];
                         Point s = points[m];
-
-                        // if (p == null || q == null || r == null || s == null)
-                        //    throw new IllegalArgumentException("null point exists");
-
                         // repeated point check
-                        int comparePQ = p.compareTo(q);
-                        int comparePR = p.compareTo(r);
                         int comparePS = p.compareTo(s);
-                        int compareQR = q.compareTo(r);
                         int compareQS = q.compareTo(s);
                         int compareRS = r.compareTo(s);
 
-                        if (comparePQ == 0 || comparePR == 0 || comparePS == 0 || compareQR == 0
-                                || compareQS == 0 || compareRS == 0)
+                        if (comparePS == 0 || compareQS == 0 || compareRS == 0)
                             throw new IllegalArgumentException("repeated points exists");
-
 
                         double slopePQ = p.slopeTo(q);
                         double slopePR = p.slopeTo(r);
