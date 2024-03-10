@@ -25,63 +25,51 @@ public class FastCollinearPoints {
         }
 
 
-        Point[] pointsCopy = new Point[points.length];
         // copy to prevent modifying original - this will be used in in-place sorting
+        Point[] pointsCopy = new Point[points.length];
         System.arraycopy(points, 0, pointsCopy, 0, points.length);
 
 
         for (Point p : points) {
-            System.out.println("=======================Point: " + p + "==================");
             Comparator<Point> slopeComparator = p.slopeOrder();
             Arrays.sort(pointsCopy, slopeComparator);
-            int i;
+
+
             // pre-compute slope
             double[] slopesToP = new double[points.length];
-            for (i = 1; i < points.length; i++) slopesToP[i] = p.slopeTo(pointsCopy[i]);
-            // search for consecutive points
-            double currentSlope, prevSlope;
-            int nConsecutive = 1;
+            for (int i = 1; i < points.length; i++) slopesToP[i] = p.slopeTo(pointsCopy[i]);
+            // search for 3 consecutive points
+            // for (int i = 1; i < points.length - 1; i++) {
+            int j = 1;
+            while (j < points.length - 1) {
+                double prevSlope = slopesToP[j - 1];
+                double currentSlope = slopesToP[j];
+                double nextSlope = slopesToP[j + 1];
 
-            for (i = 1; i < points.length; i++) {
-                prevSlope = slopesToP[i - 1];
-                currentSlope = slopesToP[i];
-
-                boolean isSlopeEqual = (Double.compare(prevSlope, currentSlope) == 0);
-
-                // // debug
-                if (currentSlope == Double.POSITIVE_INFINITY) {
-                    System.out.println(
-                            ">>>>>>>>>>>>>>>" + pointsCopy[i]
-                                    + "Vertical to P: Before update nSec: "
-                                    + nConsecutive + "with prevSlope: " + prevSlope
-                                    + "| current slope: " + currentSlope + "isEQ: " + isSlopeEqual);
-                }
-
-                // go on
-                if (isSlopeEqual) nConsecutive++;
-
-                if (nConsecutive < 3 && !isSlopeEqual) nConsecutive = 1;
-                // reset but found at least 3 consecutive
-
-                if (nConsecutive >= 3 && !isSlopeEqual) {
-                    System.out.println("Collect for output for point: " + p);
-                    // must do constant operation
-                    Point[] validPoints = new Point[nConsecutive + 1];
+                int k = j + 1;
+                if ((Double.compare(prevSlope, currentSlope) == 0) && (
+                        Double.compare(currentSlope, nextSlope) == 0)) {
+                    // find next
+                    while ((k < points.length) && (Double.compare(slopesToP[k], currentSlope)
+                            == 0)) {
+                        k++;
+                    }
+                    // sort collinear points with its order
+                    int nPointForSegment = (k - j + 1);
+                    Point[] validPoints = new Point[nPointForSegment + 1];
                     validPoints[0] = p;
-                    for (int j = 1; j <= nConsecutive; j++) {
-                        validPoints[j] = pointsCopy[i - j];
-                        // System.out.println("valid point: " + validPoints[j]);
+                    int count = 1;
+                    for (int m = j - 1; m < k; m++) {
+                        validPoints[count] = pointsCopy[m];
+                        count++;
                     }
                     Arrays.sort(validPoints);
                     arrayListPointPair.add(validPoints[0]);
-                    arrayListPointPair.add(validPoints[nConsecutive]);
+                    arrayListPointPair.add(validPoints[nPointForSegment]);
 
-                    nConsecutive = 1;
                 }
-
-                if (currentSlope == Double.POSITIVE_INFINITY) {
-                    System.out.println("After update: nSec = " + nConsecutive + "i = " + i);
-                }
+                // end of sequence
+                j = k;
 
             }
 
