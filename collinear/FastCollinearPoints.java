@@ -14,6 +14,7 @@ import java.util.Comparator;
 
 public class FastCollinearPoints {
     private ArrayList<LineSegment> arrayListLineSegments = new ArrayList<LineSegment>();
+    private ArrayList<Point> arrayListPointPair = new ArrayList<Point>();
 
     // finds all line segments containing 4 or more points
     public FastCollinearPoints(Point[] points) {
@@ -24,79 +25,63 @@ public class FastCollinearPoints {
         }
 
 
-        // copy to prevent modifying original - this will be used in in-place sorting
         Point[] pointsCopy = new Point[points.length];
+        // copy to prevent modifying original - this will be used in in-place sorting
         System.arraycopy(points, 0, pointsCopy, 0, points.length);
-
-        // repeated point will surely have similar slope to origin
-        Point originPoint = new Point(0, 0);
-        Comparator<Point> slopeComparatorOrigin = originPoint.slopeOrder();
-        Arrays.sort(pointsCopy, slopeComparatorOrigin);
-        for (int k = 0; k < pointsCopy.length - 1; k++) {
-            if (pointsCopy[k].compareTo(pointsCopy[k + 1]) == 0)
-                throw new IllegalArgumentException("Repeated point exists");
-        }
 
 
         for (Point p : points) {
             Comparator<Point> slopeComparator = p.slopeOrder();
             Arrays.sort(pointsCopy, slopeComparator);
-            // find consecutive slopes at least 4 points
-            // first index will be itself (-inf)
-            for (int i = 1; i < points.length - 3; i++) {
-                if (isThreeConsecutiveSlope(i, p, pointsCopy)) {
-                    int nPointsForSegment = 4;
-                    // if not yet max-out points
-                    if (i < points.length - 4) {
-                        nPointsForSegment = accumulateMorePointWithSameSlope(i, p, pointsCopy);
-                    }
-
-                    // sort collinear points with its order
-                    Point[] validPoints = new Point[nPointsForSegment];
+            int i;
+            // pre-compute slope
+            double[] slopesToP = new double[points.length];
+            for (i = 1; i < points.length; i++) slopesToP[i] = p.slopeTo(pointsCopy[i]);
+            // search for consecutive points
+            double currentSlope, prevSlope;
+            int nConsecutive = 1;
+            i = 1;
+            while (i < (points.length - 1)) {
+                // System.out.println("in while: " + i);
+                prevSlope = slopesToP[i - 1];
+                currentSlope = slopesToP[i];
+                boolean isSlopeEqual = (Double.compare(prevSlope, currentSlope) == 0);
+                // go on
+                if (isSlopeEqual) {
+                    nConsecutive++;
+                }
+                // reset
+                if (nConsecutive < 3 && !isSlopeEqual) {
+                    nConsecutive = 1;
+                }
+                // reset but found at least 3 consecutive
+                if (nConsecutive >= 3 && !isSlopeEqual) {
+                    // must do constant operation
+                    // ?
+                    Point[] validPoints = new Point[nConsecutive + 1];
                     validPoints[0] = p;
-                    for (int m = 1; m < nPointsForSegment; m++) {
-                        validPoints[m] = pointsCopy[i + m - 1];
+                    for (int j = 1; j <= nConsecutive; j++) {
+                        validPoints[j] = pointsCopy[i - j];
                     }
                     Arrays.sort(validPoints);
-                    arrayListLineSegments.add(
-                            new LineSegment(validPoints[0], validPoints[nPointsForSegment - 1]));
+
+                    arrayListPointPair.add(validPoints[0]);
+                    arrayListPointPair.add(validPoints[nConsecutive]);
+
+                    // LineSegment newSegment = new LineSegment(validPoints[0],
+                    //                                          validPoints[nConsecutive]);
+                    // if (!arrayListLineSegments.contains(newSegment)) {
+                    //     arrayListLineSegments.add(newSegment);
+                    // }
+                    nConsecutive = 1;
                 }
-
-
+                i++;
             }
-
         }
+        // System.out.println("DONE WITH CTOR");
 
     }
 
-    private boolean isThreeConsecutiveSlope(int i, Point ref, Point[] points) {
-        Point p = points[i];
-        Point q = points[i + 1];
-        Point r = points[i + 2];
-
-        double slopeToP = ref.slopeTo(p);
-        double slopeToQ = ref.slopeTo(q);
-        double slopeToR = ref.slopeTo(r);
-
-        return (Double.compare(slopeToP, slopeToQ) == 0 && Double.compare(slopeToP, slopeToR) == 0
-        );
-    }
-
-
-    private int accumulateMorePointWithSameSlope(int i, Point ref, Point[] points) {
-        int nPointsForSegment = 4;
-        double segmentSlope = ref.slopeTo(points[i + 1]);
-        int j = i + 3;
-        while (j < points.length) {
-
-            if (Double.compare(segmentSlope, ref.slopeTo(points[j])) == 0) {
-                nPointsForSegment++;
-                j++;
-            }
-            else break;
-        }
-        return nPointsForSegment;
-    }
 
     // the number of line segments
     public int numberOfSegments() {
@@ -105,6 +90,36 @@ public class FastCollinearPoints {
 
     // the line segments
     public LineSegment[] segments() {
+        // LineSegment[] segments = new LineSegment[arrayListLineSegments.size()];
+        // int i = 0;
+        // for (LineSegment segment : arrayListLineSegments) {
+        //     segments[i] = segment;
+        //     i++;
+        // }
+        // return segments;
+
+        // reconstruct from point pair;
+        // System.out.println("Calling segment");
+        ArrayList<Point> usedPoint = new ArrayList<Point>();
+
+        // int[] usedPoints = new int[arrayListPointPair.size()];
+
+        // System.out.println("Total Pairs: " + arrayListPointPair.size() / 2);
+        for (int i = 0; i < arrayListPointPair.size(); i += 2) {
+            Point p = arrayListPointPair.get(i);
+            Point q = arrayListPointPair.get(i + 1);
+
+            if (!usedPoint.contains(p) && !usedPoint.contains(q)) {
+                arrayListLineSegments.add(new LineSegment(p, q));
+                usedPoint.add(p);
+                usedPoint.add(q);
+            }
+            else {
+                usedPoint.add(p);
+                usedPoint.add(q);
+            }
+        }
+
         LineSegment[] segments = new LineSegment[arrayListLineSegments.size()];
         int i = 0;
         for (LineSegment segment : arrayListLineSegments) {
