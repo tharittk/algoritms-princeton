@@ -18,6 +18,9 @@ public class BruteCollinearPoints {
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points) {
         if (points == null) throw new IllegalArgumentException("null input");
+        for (Point p : points) {
+            if (p == null) throw new IllegalArgumentException("null point exists");
+        }
 
         for (int i = 0; i < points.length; i++) {
             for (int j = i + 1; j < points.length; j++) {
@@ -28,6 +31,22 @@ public class BruteCollinearPoints {
                         Point q = points[j];
                         Point r = points[k];
                         Point s = points[m];
+
+                        // if (p == null || q == null || r == null || s == null)
+                        //    throw new IllegalArgumentException("null point exists");
+
+                        // repeated point check
+                        int comparePQ = p.compareTo(q);
+                        int comparePR = p.compareTo(r);
+                        int comparePS = p.compareTo(s);
+                        int compareQR = q.compareTo(r);
+                        int compareQS = q.compareTo(s);
+                        int compareRS = r.compareTo(s);
+
+                        if (comparePQ == 0 || comparePR == 0 || comparePS == 0 || compareQR == 0
+                                || compareQS == 0 || compareRS == 0)
+                            throw new IllegalArgumentException("repeated points exists");
+
 
                         double slopePQ = p.slopeTo(q);
                         double slopePR = p.slopeTo(r);
