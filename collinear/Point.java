@@ -128,8 +128,46 @@ public class Point implements Comparable<Point> {
         return "(" + x + ", " + y + ")";
     }
 
+    private static void testSlopeTo() {
+        // Test 1: Same Point (expected negative infinity)
+        Point p1 = new Point(1, 2);
+        Point p2 = new Point(1, 2);
+        double slope = p1.slopeTo(p2);
+        System.out.println("====Test 1: Same Point ====");
+        System.out.println("Expected: -inf, get: " + slope);
+
+        // Test 2: Vertical Line (expected positive infinity)
+        p1 = new Point(1, 2);
+        p2 = new Point(1, 5);
+        slope = p1.slopeTo(p2);
+        System.out.println("====Test 2: Vertical Line ====");
+        System.out.println("Expected: +inf, get: " + slope);
+
+        // Test 3: Horizontal Line (expected 0)
+        p1 = new Point(1, 2);
+        p2 = new Point(4, 2);
+        slope = p1.slopeTo(p2);
+        System.out.println("====Test 3: Horizontal Line ====");
+        System.out.println("Expected: 0, get: " + slope);
+
+        // Test 4: Positive Slope
+        p1 = new Point(1, 2);
+        p2 = new Point(4, 8);
+        slope = p1.slopeTo(p2);
+        System.out.println("====Test 4: Positive Slope ====");
+        System.out.println("Expected: 2.0, get: " + slope);
+
+        // Test 5: Negative Slope
+        p1 = new Point(1, 8);
+        p2 = new Point(4, 2);
+        slope = p1.slopeTo(p2);
+        System.out.println("====Test 5: Negative Slope ====");
+        System.out.println("Expected: -2.0, get: " + slope);
+    }
+
     private static void testSlopeOrder() {
         Point p = new Point(1, 1);  // This point is used for slope comparison
+        System.out.println("====Tesing Slope Order ====");
 
         // Points with different slopes
         Point p1 = new Point(2, 2);  // Slope = 1 (equal)
@@ -162,37 +200,7 @@ public class Point implements Comparable<Point> {
      */
     public static void main(String[] args) {
         /* YOUR CODE HERE */
-        System.out.println("====Test 1: Same Point ====");
-        Point p1 = new Point(1, 2);
-        Point p2 = new Point(1, 2);
-        double slope = p1.slopeTo(p2);
-        System.out.println("Expected: -inf, get: " + slope);
-
-        System.out.println("====Test 2: Vertical Line ====");
-        p1 = new Point(1, 2);
-        p2 = new Point(1, 5);
-        slope = p1.slopeTo(p2);
-        System.out.println("Expected: +inf, get: " + slope);
-
-        System.out.println("====Test 3: Horizontal Line ====");
-        p1 = new Point(1, 2);
-        p2 = new Point(4, 2);
-        slope = p1.slopeTo(p2);
-        System.out.println("Expected: 0, get: " + slope);
-
-        System.out.println("====Test 4: Positive Slope  ====");
-        p1 = new Point(1, 2);
-        p2 = new Point(4, 8);
-        slope = p1.slopeTo(p2);
-        System.out.println("Expected: 2.0, get: " + slope);
-
-
-        System.out.println("====Test 5: Negative Slope  ====");
-        p1 = new Point(1, 8);
-        p2 = new Point(4, 2);
-        slope = p1.slopeTo(p2);
-        System.out.println("Expected: -2.0, get: " + slope);
-
+        testSlopeTo();
         testSlopeOrder();
     }
 }
