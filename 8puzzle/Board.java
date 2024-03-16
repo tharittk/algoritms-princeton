@@ -5,12 +5,14 @@
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Queue;
 
 public class Board {
-    private int[][] board;
+    public int[][] board;
     private int dim;
     private int hammingDistance;
     private int mahattanDistance;
+    // private int rowIndexOfZero, colIndexOfZero;
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
@@ -21,6 +23,7 @@ public class Board {
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 board[i][j] = tiles[i][j];
+
             }
         }
 
@@ -85,14 +88,138 @@ public class Board {
 
     // is this board the goal board?
     public boolean isGoal() {
+        int idealTile;
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                if (i == dim - 1 && j == dim - 1) idealTile = 0;
+                else idealTile = (j + 1) + (i) * dim;
+                // any element violates
+                if (idealTile != board[i][j]) return false;
+            }
+        }
         return true;
     }
 
     // does this board equal y?
-    // public boolean equals(Object y) {}
+    public boolean equals(Object y) {
+        if (y == this) return true;
+        if (y == null) return false;
+        if (y.getClass() != this.getClass()) return false;
+
+        Board that = (Board) y;
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                if (board[i][j] != that.board[i][j]) return false;
+            }
+        }
+        return true;
+    }
 
     // all neighboring boards
-    // public Iterable<Board> neighbors()
+    private Board createNeigborFromRowColSwap(int rowFrom, int colFrom, int rowTo, int colTo) {
+        int tmp;
+        // copy of the old board
+        Board neighbor = new Board(board);
+        tmp = neighbor.board[rowFrom][colFrom];
+        neighbor.board[rowFrom][colFrom] = neighbor.board[rowTo][colTo];
+        neighbor.board[rowTo][colTo] = tmp;
+
+        return neighbor;
+    }
+
+    public Iterable<Board> neighbors() {
+        // index of row and col of zero (space)
+        int i0 = dim; // will cause run-time error if never change
+        int j0 = dim;
+        Queue<Board> q = new Queue<Board>();
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                if (board[i][j] == 0) {
+                    i0 = i;
+                    j0 = j;
+                    break;
+                }
+            }
+        }
+        // 2 neighbors = corner
+        if (i0 == 0 && j0 == 0) {
+            // swap place for zero
+            // down
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 + 1, j0));
+            // right
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 + 1));
+        }
+        else if (i0 == 0 && j0 == (dim - 1)) {
+            // down
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 + 1, j0));
+            // left
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 - 1));
+        }
+        else if (i0 == (dim - 1) && j0 == 0) {
+            // up
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 - 1, j0));
+            // right
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 + 1));
+        }
+        else if (i0 == (dim - 1) && j0 == (dim - 1)) {
+            // up
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 - 1, j0));
+            // left
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 - 1));
+        }
+
+        // 3 neighbors = edges but not corner
+        // top
+        else if (i0 == 0) {
+            // down
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 + 1, j0));
+            // left
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 - 1));
+            // right
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 + 1));
+
+        }
+        // bottom
+        else if (i0 == (dim - 1)) {
+            // up
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 - 1, j0));
+            // left
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 - 1));
+            // right
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 + 1));
+        }
+        // left edge
+        else if (j0 == 0) {
+            // right
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 + 1));
+            // up
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 - 1, j0));
+            // down
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 + 1, j0));
+        }
+        // right edge
+        else if (j0 == (dim - 1)) {
+            // left
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 - 1));
+            // up
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 - 1, j0));
+            // down
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 + 1, j0));
+        }
+        // 4 neightbors = interior
+        else {
+            // left
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 - 1));
+            // right
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0, j0 + 1));
+            // up
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 - 1, j0));
+            // down
+            q.enqueue(createNeigborFromRowColSwap(i0, j0, i0 + 1, j0));
+        }
+
+        return q;
+    }
 
     // a board that is obtained by exchanging any pair of tiles
     // public Board twin()
@@ -113,6 +240,11 @@ public class Board {
             System.out.println(initial.toString());
             System.out.println("Hamming: " + initial.hamming());
             System.out.println("Manhattan: " + initial.manhattan());
+
+            Iterable<Board> q = initial.neighbors();
+            for (Board b : q) {
+                System.out.println(b.toString());
+            }
 
         }
     }
