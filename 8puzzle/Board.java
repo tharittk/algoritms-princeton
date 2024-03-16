@@ -222,7 +222,43 @@ public class Board {
     }
 
     // a board that is obtained by exchanging any pair of tiles
-    // public Board twin()
+    public Board twin() {
+        // make sure you not exchanging place of zero
+        int i1, i2, j1, j2;
+        // index of row and col of zero (space)
+        int i0 = dim; // will cause run-time error if never change
+        int j0 = dim;
+        Queue<Board> q = new Queue<Board>();
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                if (board[i][j] == 0) {
+                    i0 = i;
+                    j0 = j;
+                    break;
+                }
+            }
+        }
+        i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+
+        // the first point must not be zero
+        while (i1 == i0 && j1 == j0) {
+            i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+            j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        }
+
+        i2 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        j2 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+
+        // the second point must not be at 0 or same point as (i1,j1)
+        while ((i2 == i0 && j2 == j0) || (i2 == i1 && j2 == j1)) {
+            i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+            j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        }
+
+        return createNeigborFromRowColSwap(i1, j1, i2, j2);
+
+    }
 
     // unit testing (not graded)
     public static void main(String[] args) {
@@ -245,6 +281,8 @@ public class Board {
             for (Board b : q) {
                 System.out.println(b.toString());
             }
+
+            System.out.println("Twin: " + initial.twin());
 
         }
     }
