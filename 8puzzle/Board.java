@@ -24,7 +24,8 @@ public class Board {
                 board[i][j] = tiles[i][j];
             }
         }
-        
+
+
     }
 
     // string representation of this board
@@ -235,25 +236,31 @@ public class Board {
                 }
             }
         }
-        i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
-        j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        // i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        // j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        //
+        // // the first point must not be zero
+        // while (i1 == i0 && j1 == j0) {
+        //     i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        //     j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        // }
+        //
+        // i2 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        // j2 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        //
+        // // the second point must not be at 0 or same point as (i1,j1)
+        // while ((i2 == i0 && j2 == j0) || (i2 == i1 && j2 == j1)) {
+        //     i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        //     j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        // }
 
-        // the first point must not be zero
-        while (i1 == i0 && j1 == j0) {
-            i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
-            j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
-        }
+        if (i0 == 0) i1 = i0 + 1;
+        else i1 = i0 - 1;
 
-        i2 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
-        j2 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
+        if (j0 == 0) j1 = j0 + 1;
+        else j1 = j0 - 1;
 
-        // the second point must not be at 0 or same point as (i1,j1)
-        while ((i2 == i0 && j2 == j0) || (i2 == i1 && j2 == j1)) {
-            i1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
-            j1 = edu.princeton.cs.algs4.StdRandom.uniformInt(dim);
-        }
-
-        return createNeigborFromRowColSwap(i1, j1, i2, j2);
+        return createNeigborFromRowColSwap(i1, j0, i1, j1);
 
     }
 

@@ -35,10 +35,10 @@ public class Solver {
         PQTwin.insert(rootSearchTwin);
 
         // GameTree
-        prevSearch = rootSearch;
+        prevSearch = null;
         currentSearch = PQ.delMin();
 
-        prevSearchTwin = rootSearchTwin;
+        prevSearchTwin = null;
         currentSearchTwin = PQTwin.delMin();
 
         while (!currentSearch.associatedBoard.isGoal()
@@ -51,14 +51,14 @@ public class Solver {
             // insert neighbors to PQ
             for (Board neighbor : neighborBoards) {
                 // optimization: not insert the prev.board
-                if (neighbor != prevSearch.associatedBoard) {
+                if (prevSearch == null || !neighbor.equals(prevSearch.associatedBoard)) {
                     PQ.insert(new SearchNode(currentSearch, neighbor));
                 }
             }
             // twin
             for (Board neighbor : neighborBoardsTwin) {
                 // optimization: not insert the prev.board
-                if (neighbor != prevSearchTwin.associatedBoard) {
+                if (prevSearch == null || !neighbor.equals(prevSearchTwin.associatedBoard)) {
                     PQTwin.insert(new SearchNode(currentSearchTwin, neighbor));
                 }
             }
