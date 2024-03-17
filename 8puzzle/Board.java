@@ -10,8 +10,6 @@ import edu.princeton.cs.algs4.Queue;
 public class Board {
     private int[][] board;
     private int dim;
-    private int hammingDistance;
-    private int mahattanDistance;
 
     // private int rowIndexOfZero, colIndexOfZero;
 
@@ -26,10 +24,7 @@ public class Board {
                 board[i][j] = tiles[i][j];
             }
         }
-        // pre-compute and caching distance
-        hammingDistance = hamming();
-        mahattanDistance = manhattan();
-
+        
     }
 
     // string representation of this board
@@ -53,7 +48,7 @@ public class Board {
     // number of tiles out of place
     public int hamming() {
         int idealTile;
-        hammingDistance = 0;
+        int hammingDistance = 0;
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 // ideal tile
@@ -71,8 +66,7 @@ public class Board {
     // sum of Manhattan distances between tiles and goal
     public int manhattan() {
         int stepToIdeal, rowIdeal, colIdeal;
-
-        mahattanDistance = 0;
+        int mahattanDistance = 0;
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 rowIdeal = (board[i][j] - 1) / dim;
@@ -112,7 +106,7 @@ public class Board {
         Board that = (Board) y;
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
-                if (this.board[i][j] != that.getBoard()[i][j]) return false;
+                if (this.board[i][j] != that.board[i][j]) return false;
             }
         }
         return true;
@@ -231,7 +225,7 @@ public class Board {
         // index of row and col of zero (space)
         int i0 = dim; // will cause run-time error if never change
         int j0 = dim;
-        
+
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 if (board[i][j] == 0) {
@@ -263,17 +257,17 @@ public class Board {
 
     }
 
-    public int[][] getBoard() {
-        return this.board;
-    }
-
-    public int getHammingDistance() {
-        return this.hammingDistance;
-    }
-
-    public int getMahattanDistance() {
-        return this.mahattanDistance;
-    }
+    // public int[][] getBoard() {
+    //     return this.board;
+    // }
+    //
+    // public int getHammingDistance() {
+    //     return this.hammingDistance;
+    // }
+    //
+    // public int getMahattanDistance() {
+    //     return this.mahattanDistance;
+    // }
 
     // unit testing (not graded)
     public static void main(String[] args) {
@@ -289,8 +283,8 @@ public class Board {
             }
             Board initial = new Board(tiles);
             System.out.println(initial.toString());
-            System.out.println("Hamming: " + initial.getHammingDistance());
-            System.out.println("Manhattan: " + initial.getMahattanDistance());
+            System.out.println("Hamming: " + initial.hamming());
+            System.out.println("Manhattan: " + initial.manhattan());
 
             Iterable<Board> q = initial.neighbors();
             for (Board b : q) {

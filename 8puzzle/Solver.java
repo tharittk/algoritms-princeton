@@ -1,79 +1,109 @@
 /* *****************************************************************************
- *  Name: Thair T.
+ *  Name: Tharit T.
  *  Date: March 17, 2024
  *  Description:
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.Stack;
 
 public class Solver {
-    private int moveSoFar;
-    private Board prevBoard;
-    private MinPQ<SearchNode> PQ;
+
+    private SearchNode rootSearch, terminalSearch;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
 
-        PQ = new MinPQ<SearchNode>();
+        SearchNode prevSearch, currentSearch;
+        MinPQ<SearchNode> PQ = new MinPQ<SearchNode>();
 
+        // insert root search to empty priority queue
+        rootSearch = new SearchNode(null, initial);
+        PQ.insert(rootSearch);
 
-        // insert initial to empty priority queue
+        // Need to simutenously implement twin ( || Twin.isGoal)
 
-        // current = deuque Root
-        // move = 1 // wrong if not monotonically go deeper (no in PQ)
+        prevSearch = rootSearch;
+        currentSearch = PQ.delMin();
+        while (!currentSearch.associatedBoard.isGoal()) {
 
-        // while current is not goal board
+            // constructing neighbors from current
+            Iterable<Board> neighborBoards = currentSearch.associatedBoard.neighbors();
 
-        // constructing neighbors from current
+            // insert neighbors to PQ
+            for (Board neighbor : neighborBoards) {
+                // optimization: not insert the prev.board
+                if (neighbor != prevSearch.associatedBoard) {
+                    PQ.insert(new SearchNode(currentSearch, neighbor));
+                }
+            }
+            // current search = dequeue min PQ
+            prevSearch = currentSearch;
+            currentSearch = PQ.delMin();
 
-        // insert neighbors to PQ
-
-        // save curent to prev
-
-        // current search = dequeue min PQ
-
+        }
+        // save solution
+        terminalSearch = currentSearch;
 
     }
 
-    // class for seach node
+    // class for search node
     private class SearchNode implements Comparable<SearchNode> {
-        private Board previousBoard, currentBoard;
-        private int moveSofar, manhattan, hamming, priorityManhattan, priorityHamming;
+        private SearchNode prevSearch;
+        private Board associatedBoard;
+        private int moveSoFar;
+        private int priorityManhattan;
+        private int priorityHamming;
 
         // constructor
-        private SearchNode(Board prev, Board current, int move) {
-            previousBoard = prev;
-            currentBoard = current;
-            moveSofar = move;
-            // pre-compute for caching
-            hamming = current.hamming();
-            manhattan = current.manhattan();
+        private SearchNode(SearchNode prevNode, Board currentBaord) {
 
-            priorityHamming = moveSoFar + priorityManhattan;
+            prevSearch = prevNode;
+            associatedBoard = currentBaord;
+
+            if (prevSearch == null) moveSoFar = 0; // root
+            else moveSoFar = prevNode.moveSoFar + 1;
+
+            // pre-compute for caching
+            int hamming = associatedBoard.hamming();
+            int manhattan = associatedBoard.manhattan();
+
+            priorityHamming = moveSoFar + hamming;
             priorityManhattan = moveSoFar + manhattan;
 
         }
 
         public int compareTo(SearchNode that) {
-            return this.priorityHamming - that.priorityHamming;
+            // use caching in construction
+            return this.priorityManhattan - that.priorityManhattan;
         }
-
 
     }
 
     // is the initial board solvable? (see below)
     public boolean isSolvable() {
+        // which one wins, twin or
         return true;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        return -1;
+        // not yet implement twins
+        return terminalSearch.moveSoFar;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
-
+        SearchNode currentSearch;
+        Stack<Board> solutionPath = new Stack<Board>();
+        currentSearch = terminalSearch;
+        while (currentSearch.prevSearch != null) {
+            solutionPath.push(currentSearch.associatedBoard);
+            currentSearch = currentSearch.prevSearch;
+        }
+        // push to the root search node
+        solutionPath.push(rootSearch.associatedBoard);
+        return solutionPath;
     }
 
     // test client (see below)
