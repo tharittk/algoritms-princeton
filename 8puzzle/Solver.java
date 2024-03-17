@@ -12,26 +12,41 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
-    private SearchNode rootSearch, terminalSearch;
+    private SearchNode rootSearch, rootSearchTwin, terminalSearch;
+    private boolean originalWins;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
 
+        // Original
         SearchNode prevSearch, currentSearch;
         MinPQ<SearchNode> PQ = new MinPQ<SearchNode>();
+        // Twin
+        SearchNode prevSearchTwin, currentSearchTwin;
+        MinPQ<SearchNode> PQTwin = new MinPQ<SearchNode>();
 
         // insert root search to empty priority queue
         rootSearch = new SearchNode(null, initial);
         PQ.insert(rootSearch);
 
-        // Need to simutenously implement twin ( || Twin.isGoal)
+        // twin
+        Board initalTwin = initial.twin();
+        rootSearchTwin = new SearchNode(null, initalTwin);
+        PQTwin.insert(rootSearchTwin);
 
+        // GameTree
         prevSearch = rootSearch;
         currentSearch = PQ.delMin();
-        while (!currentSearch.associatedBoard.isGoal()) {
+
+        prevSearchTwin = rootSearchTwin;
+        currentSearchTwin = PQTwin.delMin();
+
+        while (!currentSearch.associatedBoard.isGoal()
+                && !currentSearchTwin.associatedBoard.isGoal()) {
 
             // constructing neighbors from current
             Iterable<Board> neighborBoards = currentSearch.associatedBoard.neighbors();
+            Iterable<Board> neighborBoardsTwin = currentSearchTwin.associatedBoard.neighbors();
 
             // insert neighbors to PQ
             for (Board neighbor : neighborBoards) {
@@ -40,13 +55,32 @@ public class Solver {
                     PQ.insert(new SearchNode(currentSearch, neighbor));
                 }
             }
+            // twin
+            for (Board neighbor : neighborBoardsTwin) {
+                // optimization: not insert the prev.board
+                if (neighbor != prevSearchTwin.associatedBoard) {
+                    PQTwin.insert(new SearchNode(currentSearchTwin, neighbor));
+                }
+            }
+
             // current search = dequeue min PQ
             prevSearch = currentSearch;
             currentSearch = PQ.delMin();
 
+            prevSearchTwin = currentSearchTwin;
+            currentSearchTwin = PQTwin.delMin();
         }
         // save solution
-        terminalSearch = currentSearch;
+
+        // original or twin
+        if (currentSearch.associatedBoard.isGoal()) {
+            terminalSearch = currentSearch;
+            originalWins = true;
+        }
+        else {
+            terminalSearch = currentSearchTwin;
+            originalWins = false;
+        }
 
     }
 
@@ -86,7 +120,7 @@ public class Solver {
     // is the initial board solvable? (see below)
     public boolean isSolvable() {
         // which one wins, twin or
-        return true;
+        return originalWins;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
