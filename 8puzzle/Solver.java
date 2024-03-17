@@ -1,6 +1,6 @@
 /* *****************************************************************************
- *  Name:
- *  Date:
+ *  Name: Thair T.
+ *  Date: March 17, 2024
  *  Description:
  **************************************************************************** */
 
@@ -9,12 +9,12 @@ import edu.princeton.cs.algs4.MinPQ;
 public class Solver {
     private int moveSoFar;
     private Board prevBoard;
-    public MinPQ <Board> PQ;
+    private MinPQ<SearchNode> PQ;
 
     // find a solution to the initial board (using the A* algorithm)
-    public Solver(Board initial){
+    public Solver(Board initial) {
 
-        PQ = new MinPQ<Board>();
+        PQ = new MinPQ<SearchNode>();
 
 
         // insert initial to empty priority queue
@@ -39,19 +39,22 @@ public class Solver {
     private class SearchNode implements Comparable<SearchNode> {
         private Board previousBoard, currentBoard;
         private int moveSofar, manhattan, hamming, priorityManhattan, priorityHamming;
+
         // constructor
-        private SearchNode (Board prev, Board current, int move){
+        private SearchNode(Board prev, Board current, int move) {
             previousBoard = prev;
             currentBoard = current;
             moveSofar = move;
-            hamming = current.getHammingDistance();
-            manhattan = current.getMahattanDistance();
+            // pre-compute for caching
+            hamming = current.hamming();
+            manhattan = current.manhattan();
 
             priorityHamming = moveSoFar + priorityManhattan;
             priorityManhattan = moveSoFar + manhattan;
 
         }
-        public int compareTo(SearchNode that){
+
+        public int compareTo(SearchNode that) {
             return this.priorityHamming - that.priorityHamming;
         }
 
@@ -59,15 +62,23 @@ public class Solver {
     }
 
     // is the initial board solvable? (see below)
-    public boolean isSolvable(){}
+    public boolean isSolvable() {
+        return true;
+    }
 
     // min number of moves to solve initial board; -1 if unsolvable
-    public int moves()
+    public int moves() {
+        return -1;
+    }
 
     // sequence of boards in a shortest solution; null if unsolvable
-    public Iterable<Board> solution()
+    public Iterable<Board> solution() {
+
+    }
 
     // test client (see below)
-    public static void main(String[] args)
+    public static void main(String[] args) {
+        System.out.println(">> Start solver");
+    }
 
 }
