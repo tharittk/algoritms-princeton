@@ -145,7 +145,7 @@ public class Solver {
             currentSearch = currentSearch.prevSearch;
         }
         // push to the root search node
-        solutionStack.push(rootSearch.associatedBoard);
+        solutionStack.push(currentSearch.associatedBoard);
 
         while (!solutionStack.isEmpty()) {
             solutionPath.enqueue(solutionStack.pop());
