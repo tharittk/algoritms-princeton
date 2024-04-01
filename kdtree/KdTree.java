@@ -4,8 +4,10 @@
  *  Description:
  **************************************************************************** */
 
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
+import edu.princeton.cs.algs4.StdDraw;
 
 import java.util.ArrayList;
 
@@ -53,6 +55,8 @@ public class KdTree {
         if (p == null) throw new IllegalArgumentException("null point inserted !");
         // isRed is always true at root node
         root = insert(root, p, true);
+
+        // System.out.println("Sucessfully insert: " + p);
     }
 
     // helper function for insert
@@ -158,6 +162,37 @@ public class KdTree {
 
     // unit testing of the methods (optional)
     public static void main(String[] args) {
+        System.out.println("Test running");
+        In in = new In(args[0]);
+        KdTree kdTree = new KdTree();
+
+        // draw the points
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 1);
+        StdDraw.setYscale(0, 1);
+        StdDraw.setPenColor(StdDraw.BLACK);
+        StdDraw.setPenRadius(0.03);
+
+        // Read until the end of the file
+        int count = 1;
+        while (!in.isEmpty()) {
+            double x = in.readDouble();
+            double y = in.readDouble();
+            // Create and add Point2D objects
+            Point2D p = new Point2D(x, y);
+            Point2D q;
+            kdTree.insert(p);
+
+            // test get and contains
+            if (kdTree.contains(p)) {
+                q = kdTree.get(p);
+                q.draw();
+                StdDraw.text(q.x(), q.y() + 0.05, Integer.toString(count));
+                count++;
+            }
+        }
+        in.close();
+        StdDraw.show();
 
     }
 }
