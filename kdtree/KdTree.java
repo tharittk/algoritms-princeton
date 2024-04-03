@@ -26,6 +26,7 @@ public class KdTree {
         private RectHV lRect;
         private Node lb;        // the left/bottom subtree
         private Node rt;        // the right/top subtree
+        private boolean verticalSplit; // for plotting
 
         public Node(Point2D p) {
             this.p = p;
@@ -33,6 +34,7 @@ public class KdTree {
             this.rRect = null;
             this.lb = null;
             this.rt = null;
+            this.verticalSplit = true;
         }
     }
 
@@ -55,8 +57,8 @@ public class KdTree {
     // add the point to the set (if it is not already in the set)
     public void insert(Point2D p) {
         if (p == null) throw new IllegalArgumentException("null point inserted !");
-        // isRed is always true at root node
-        root = insert(root, null, p, true, true);
+        // parentIsVertical is always false at root node
+        root = insert(root, null, p, true);
         // need edge case for root node rectangle creation !
 
 
@@ -64,11 +66,9 @@ public class KdTree {
     }
 
     private static void assignRectanglesToNode(Node insertNode, Node parentNode, Point2D p,
-                                               boolean parentIsVerical,
                                                boolean insertAsLeftChild) {
 
         double xminParent, xmaxParent, yminParent, ymaxParent;
-
         // case of root node
         if (parentNode == null) {
             xminParent = 0.0;
@@ -91,11 +91,14 @@ public class KdTree {
             }
         }
 
-        if (parentIsVerical) {
+        // rectangle for root
+        if (parentNode == null || !parentNode.verticalSplit) {
+            // left-right
             insertNode.lRect = new RectHV(xminParent, yminParent, p.x(), ymaxParent);
             insertNode.rRect = new RectHV(p.x(), yminParent, xmaxParent, ymaxParent);
         }
         else {
+            // top-bottom
             insertNode.lRect = new RectHV(xminParent, yminParent, xmaxParent, p.y());
             insertNode.rRect = new RectHV(xminParent, p.y(), xmaxParent, ymaxParent);
         }
@@ -104,21 +107,24 @@ public class KdTree {
     }
 
     // helper function for insert
-    private Node insert(Node currentNode, Node parentNode, Point2D p, boolean parentIsVertical,
+    private Node insert(Node currentNode, Node parentNode, Point2D p,
                         boolean insertAsLeftChild) {
         // not yet exist
         if (currentNode == null) {
             this.treeSize++;
-
             // construct rec here to p
-
             Node insertNode = new Node(p);
+            assignRectanglesToNode(insertNode, parentNode, p, insertAsLeftChild);
 
-            assignRectanglesToNode(insertNode, parentNode, p, parentIsVertical, insertAsLeftChild);
+            if (parentNode == null) {
+                insertNode.verticalSplit = true;
+            }
+            // negate of parent
+            else insertNode.verticalSplit = !parentNode.verticalSplit;
 
-            if (parentNode != null)
-                System.out.println("inserting" + insertNode.p + "with parent:" + parentNode.p);
-            else System.out.println("inserting root");
+            // if (parentNode != null)
+            //     System.out.println("inserting" + insertNode.p + "with parent:" + parentNode.p);
+            // else System.out.println("inserting root");
 
             return insertNode;
         }
@@ -127,28 +133,27 @@ public class KdTree {
             return currentNode;
         }
         // Continue recursive search
-        parentNode = currentNode;
-
         // compare x
-        if (parentIsVertical) {
+        if (currentNode.verticalSplit) {
             // go left
+
             if (p.x() < currentNode.p.x()) {
-                currentNode.lb = insert(currentNode.lb, parentNode, p, false, true);
+                currentNode.lb = insert(currentNode.lb, currentNode, p, true);
             }
             // go right
             else {
-                currentNode.rt = insert(currentNode.rt, parentNode, p, false, false);
+                currentNode.rt = insert(currentNode.rt, currentNode, p, false);
             }
         }
         // compare y
         else {
             // go left
             if (p.y() < currentNode.p.y()) {
-                currentNode.lb = insert(currentNode.lb, parentNode, p, true, true);
+                currentNode.lb = insert(currentNode.lb, currentNode, p, true);
             }
             // go right
             else {
-                currentNode.rt = insert(currentNode.rt, parentNode, p, true, false);
+                currentNode.rt = insert(currentNode.rt, currentNode, p, false);
             }
         }
         // not-ever to come here... but if comes make sure it is the point that already there
@@ -201,10 +206,25 @@ public class KdTree {
         if (node == null) {
             return;
         }
+        StdDraw.setPenColor(StdDraw.BLACK);
         node.p.draw();
 
-        dfs(node.lb);
+        // draw rectangle
+        if (node.verticalSplit) {
+            StdDraw.setPenColor(StdDraw.RED);
+            StdDraw.line(node.p.x(), node.lRect.ymin(), node.p.x(), node.lRect.ymax());
+        }
+        else {
+            StdDraw.setPenColor(StdDraw.BLUE);
+            StdDraw.line(node.lRect.xmin(), node.p.y(), node.lRect.xmax(), node.p.y());
+        }
 
+        System.out.println("Draw Node: " + node.p);
+        System.out.println("Rectangle L: " + node.lRect);
+        System.out.println("Rectangle R: " + node.rRect);
+        System.out.println("=============");
+
+        dfs(node.lb);
         dfs(node.rt);
     }
 
