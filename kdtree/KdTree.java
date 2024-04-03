@@ -233,6 +233,7 @@ public class KdTree {
 
     // all points that are inside the rectangle (or on the boundary)
     public Iterable<Point2D> range(RectHV rect) {
+        if (rect == null) throw new IllegalArgumentException("null argument !");
 
         ArrayList<Point2D> pointsCollected = new ArrayList<Point2D>();
         if (root == null) return pointsCollected;
@@ -280,12 +281,16 @@ public class KdTree {
 
         public Champion() {
             p = null;
-            dist = Double.MAX_VALUE;
+            dist = Double.POSITIVE_INFINITY;
 
         }
     }
 
     public Point2D nearest(Point2D p) {
+
+        if (p == null) throw new IllegalArgumentException("null argument !");
+        if (this.isEmpty()) return null;
+
         Champion champion = new Champion();
         champion.p = root.p;
         champion.dist = p.distanceSquaredTo(champion.p);
@@ -310,11 +315,12 @@ public class KdTree {
             champion.p = currentNode.p;
         }
         // same as right rect
-        currentDistP2Rect = currentNode.lRect.distanceSquaredTo(p);
+        // currentDistP2Rect = currentNode.lRect.distanceSquaredTo(p);
 
         // worth exploring or not: using newly dist that may come from other-side subtree
 
-        if (champion.dist < currentDistP2Rect) {
+        if (champion.dist < currentNode.lRect.distanceSquaredTo(p)
+                && champion.dist < currentNode.rRect.distanceSquaredTo(p)) {
             return;
         }
         else {
@@ -338,12 +344,6 @@ public class KdTree {
         In in = new In(args[0]);
         KdTree kdTree = new KdTree();
 
-        // draw the points
-        // StdDraw.enableDoubleBuffering();
-        // StdDraw.setXscale(0, 1);
-        // StdDraw.setYscale(0, 1);
-        // StdDraw.setPenColor(StdDraw.BLACK);
-        // StdDraw.setPenRadius(0.01);
 
         // Read until the end of the file
         while (!in.isEmpty()) {
@@ -354,8 +354,15 @@ public class KdTree {
             kdTree.insert(p);
         }
         in.close();
-        // kdTree.draw();
-        // StdDraw.show();
+        // draw the points
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 1);
+        StdDraw.setYscale(0, 1);
+        StdDraw.setPenColor(StdDraw.BLACK);
+        StdDraw.setPenRadius(0.01);
+
+        kdTree.draw();
+        StdDraw.show();
         System.out.println("Tree size: " + kdTree.size());
 
         System.out.println(">> Testing Range search");
