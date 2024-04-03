@@ -206,8 +206,7 @@ public class KdTree {
         if (node == null) {
             return;
         }
-        StdDraw.setPenColor(StdDraw.BLACK);
-        node.p.draw();
+
 
         // draw rectangle
         if (node.verticalSplit) {
@@ -218,11 +217,12 @@ public class KdTree {
             StdDraw.setPenColor(StdDraw.BLUE);
             StdDraw.line(node.lRect.xmin(), node.p.y(), node.lRect.xmax(), node.p.y());
         }
-
-        System.out.println("Draw Node: " + node.p);
-        System.out.println("Rectangle L: " + node.lRect);
-        System.out.println("Rectangle R: " + node.rRect);
-        System.out.println("=============");
+        StdDraw.setPenColor(StdDraw.BLACK);
+        node.p.draw();
+        // System.out.println("Draw Node: " + node.p);
+        // System.out.println("Rectangle L: " + node.lRect);
+        // System.out.println("Rectangle R: " + node.rRect);
+        // System.out.println("=============");
 
         dfs(node.lb);
         dfs(node.rt);
@@ -234,7 +234,44 @@ public class KdTree {
 
     // all points that are inside the rectangle (or on the boundary)
     public Iterable<Point2D> range(RectHV rect) {
-        return new ArrayList<Point2D>();
+
+        ArrayList<Point2D> pointsCollected = new ArrayList<Point2D>();
+        if (root == null) return pointsCollected;
+
+        if (rect.contains(root.p)) {
+            pointsCollected.add(root.p);
+        }
+        // go left
+        if (rect.intersects(root.lRect)) {
+            // recursively call function with currentNode.lb
+            range(rect, root.lb, pointsCollected);
+        }
+        // go right
+        if (rect.intersects(root.rRect)) {
+            // recursively call function with currentNode.rt
+            range(rect, root.rt, pointsCollected);
+        }
+
+        return pointsCollected;
+    }
+
+    private void range(RectHV rect, Node currentNode, ArrayList<Point2D> pointsCollected) {
+
+        if (currentNode == null) return;
+
+        if (rect.contains(currentNode.p)) {
+            pointsCollected.add(currentNode.p);
+        }
+        // go left
+        if (rect.intersects(currentNode.lRect)) {
+            // recursively call function with currentNode.lb
+            range(rect, currentNode.lb, pointsCollected);
+        }
+        // go right
+        if (rect.intersects(currentNode.rRect)) {
+            // recursively call function with currentNode.rt
+            range(rect, currentNode.rt, pointsCollected);
+        }
     }
 
     // a nearest neighbor in the set to point p; null if the set is empty
@@ -268,6 +305,16 @@ public class KdTree {
         kdTree.draw();
         StdDraw.show();
         System.out.println("Tree size: " + kdTree.size());
+
+        System.out.println(">> Testing Range search");
+        RectHV testRect = new RectHV(0.05, 0.35, 0.15, 0.73);
+        Iterable<Point2D> pointsCollected;
+        pointsCollected = kdTree.range(testRect);
+
+        for (Point2D p : pointsCollected) {
+            System.out.println(p + "is within rect" + testRect);
+        }
+
 
     }
 }
