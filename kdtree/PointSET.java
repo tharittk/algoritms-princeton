@@ -96,23 +96,21 @@ public class PointSET {
 
         // Set-up rectangle
         double xmin, xmax, ymin, ymax;
-        xmin = 0.3;
-        xmax = 0.7;
-        ymin = 0.4;
-        ymax = 0.6;
-        RectHV rect = new RectHV(xmin, ymin, xmax, ymax);
-        rect.draw();
+
+        RectHV testRect = new RectHV(0.05, 0.35, 0.15, 0.73);
+
+        testRect.draw();
         StdDraw.show();
 
         // Run range algorithms
-        Iterable<Point2D> pointInside = pointSet.range(rect);
+        Iterable<Point2D> pointInside = pointSet.range(testRect);
 
         for (Point2D p : pointInside) {
             p.draw();
         }
         StdDraw.show();
 
-        Point2D nearTestPoint = new Point2D(0.9, 0.9);
+        Point2D nearTestPoint = new Point2D(0.81, 0.3);
         // Point2D nearTestPoint = null;
 
         Point2D nearestPoint = pointSet.nearest(nearTestPoint);

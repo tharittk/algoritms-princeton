@@ -1,7 +1,7 @@
 /* *****************************************************************************
- *  Name:
- *  Date:
- *  Description:
+ *  Name: Tharit T.
+ *  Date: 3 April 2024
+ *  Description: KdTree
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
@@ -207,7 +207,6 @@ public class KdTree {
             return;
         }
 
-
         // draw rectangle
         if (node.verticalSplit) {
             StdDraw.setPenColor(StdDraw.RED);
@@ -275,9 +274,62 @@ public class KdTree {
     }
 
     // a nearest neighbor in the set to point p; null if the set is empty
-    public Point2D nearest(Point2D p) {
-        return new Point2D(0, 0);
+    private class Champion {
+        private Point2D p;
+        private double dist;
 
+        public Champion() {
+            p = null;
+            dist = Double.MAX_VALUE;
+
+        }
+    }
+
+    public Point2D nearest(Point2D p) {
+        Champion champion = new Champion();
+        champion.p = root.p;
+        champion.dist = p.distanceSquaredTo(champion.p);
+        // double currentDistP2Rect;
+
+        nearest(p, root, champion);
+
+        return champion.p;
+
+    }
+
+    private void nearest(Point2D p, Node currentNode, Champion champion) {
+        double currentDistPP, currentDistP2Rect;
+
+        if (currentNode == null) return;
+
+        currentDistPP = p.distanceSquaredTo(currentNode.p);
+        // System.out.println("Exploring" + currentNode.p + "Dist: " + currentDistPP);
+
+        if (currentDistPP < champion.dist) {
+            champion.dist = currentDistPP;
+            champion.p = currentNode.p;
+        }
+        // same as right rect
+        currentDistP2Rect = currentNode.lRect.distanceSquaredTo(p);
+
+        // worth exploring or not: using newly dist that may come from other-side subtree
+
+        if (champion.dist < currentDistP2Rect) {
+            return;
+        }
+        else {
+            // worth exploring left first
+            if (currentNode.lRect.contains(p)) {
+                nearest(p, currentNode.lb, champion);
+                nearest(p, currentNode.rt, champion);
+            }
+            // worth exploring right first
+            else {
+                nearest(p, currentNode.rt, champion);
+                nearest(p, currentNode.lb, champion);
+            }
+
+        }
     }
 
     // unit testing of the methods (optional)
@@ -287,11 +339,11 @@ public class KdTree {
         KdTree kdTree = new KdTree();
 
         // draw the points
-        StdDraw.enableDoubleBuffering();
-        StdDraw.setXscale(0, 1);
-        StdDraw.setYscale(0, 1);
-        StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.setPenRadius(0.01);
+        // StdDraw.enableDoubleBuffering();
+        // StdDraw.setXscale(0, 1);
+        // StdDraw.setYscale(0, 1);
+        // StdDraw.setPenColor(StdDraw.BLACK);
+        // StdDraw.setPenRadius(0.01);
 
         // Read until the end of the file
         while (!in.isEmpty()) {
@@ -302,8 +354,8 @@ public class KdTree {
             kdTree.insert(p);
         }
         in.close();
-        kdTree.draw();
-        StdDraw.show();
+        // kdTree.draw();
+        // StdDraw.show();
         System.out.println("Tree size: " + kdTree.size());
 
         System.out.println(">> Testing Range search");
@@ -315,6 +367,11 @@ public class KdTree {
             System.out.println(p + "is within rect" + testRect);
         }
 
+        System.out.println(">> Testing Nearest search");
+        Point2D searchP = new Point2D(0.81, 0.3);
+
+        Point2D nearestPoint = kdTree.nearest(searchP);
+        System.out.println("Nearest point Found: " + nearestPoint);
 
     }
 }
