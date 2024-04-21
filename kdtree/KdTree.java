@@ -243,12 +243,10 @@ public class KdTree {
         }
         // go left
         if (rect.intersects(root.lRect)) {
-            // recursively call function with currentNode.lb
             range(rect, root.lb, pointsCollected);
         }
         // go right
         if (rect.intersects(root.rRect)) {
-            // recursively call function with currentNode.rt
             range(rect, root.rt, pointsCollected);
         }
 
