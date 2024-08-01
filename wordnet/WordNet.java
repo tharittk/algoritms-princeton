@@ -9,6 +9,7 @@ public class WordNet {
     private BST<String, Integer> bst;
     private HashMap<Integer, String> hmap;
     private Digraph G;
+    private SAP sap;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -45,6 +46,8 @@ public class WordNet {
             }
         }
 
+        sap = new SAP(G);
+
         // check cycle
         DirectedCycle dc = new DirectedCycle(G);
         if (dc.hasCycle()) throw new IllegalArgumentException("G has a cycle");
@@ -69,13 +72,13 @@ public class WordNet {
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
-
+        return this.sap.length(bst.get(nounA), bst.get(nounB));
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
     // in a shortest ancestral path (defined below)
     public String sap(String nounA, String nounB) {
-        return "test";
+        return hmap.get(this.sap.ancestor(bst.get(nounA), bst.get(nounB)));
     }
 
     // do unit testing of this class
