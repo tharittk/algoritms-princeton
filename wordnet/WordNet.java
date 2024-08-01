@@ -3,8 +3,11 @@ import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
+import java.util.HashMap;
+
 public class WordNet {
     private BST<String, Integer> bst;
+    private HashMap<Integer, String> hmap;
     private Digraph G;
 
     // constructor takes the name of the two input files
@@ -17,13 +20,17 @@ public class WordNet {
         In inHyp = new In(hypernyms);
 
         // Use BST (k,v) = (noun, vertex id) for O(log n) search
+        // and hmap for search noun for a given vertex number
         bst = new BST<String, Integer>();
+        hmap = new HashMap<Integer, String>();
+
         String[] fields;
         int count = 0;
         while (inSyn.hasNextLine()) {
             String line = inSyn.readLine();
             fields = line.split(",");
             bst.put(fields[1], Integer.parseInt(fields[0]));
+            hmap.put(Integer.parseInt(fields[0]), fields[1]);
             count++;
         }
         // Build Direct Graph from vertices
@@ -38,15 +45,15 @@ public class WordNet {
             }
         }
 
-        // CHECK HERE IF G IS DAG with only one root
+        // check cycle
         DirectedCycle dc = new DirectedCycle(G);
         if (dc.hasCycle()) throw new IllegalArgumentException("G has a cycle");
+        // check one root
         int countRoot = 0;
         for (int i = 0; i < count; i++) {
             if (G.outdegree(i) == 0) countRoot++;
         }
         if (countRoot > 1) throw new IllegalArgumentException("More than one root");
-
 
     }
 
@@ -62,68 +69,7 @@ public class WordNet {
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
-        if (!isNoun(nounA) || !isNoun(nounB)) {
-            throw new IllegalArgumentException("nounA or nounB is not in WordNet");
-        }
-	int va = bst.get(nounA);
-	int vb = bst.get(nounB);
 
-	// light-weigth bfs
-	aMarked = new boolean[G.V()];
-	aDistTo = new int[G.V()];
-	aEdgeTo = new int[G.V()];
-	
-	bMarked = new boolean[G.V()];
-	bDistTo = new int[G.V()];
-	bEdgeTo = new int[G.V()];
-	
-	for (int v = 0; v < G.V(); v++){
-		aDistTo[v] = INFINITY;
-		bDistTo[v] = INFINITY;
-	}
-	
-	// alternating bfs
-	
-	Queue<Integer> aq = new Queue<Integer>();
-	Queue<Integer> bq = new Queue<Integer>();
-	aMarked[va] = true;
-	bMarked[vb] = true;
-	aDistTo[va] = 0;
-	bDistTo[vb] = 0;
-
-	aq.enqueue(va);
-	bq.enqueue(vb);
-
-	while (!aq.isEmpty() && !bq.isEmpty()){
-		// Next border of A
-		int anext = aq.dequeue();
-		for (int w: G.adj(anext)){
-			if (!aMarked[w]){
-				aEdgeTo[w] = anext;
-				aDistTo[w] = aDistTo[anext]+1;
-				aMarked[w] = true;
-				aq.enqueue(w);
-			}
-			if (bMarked[w]){ //found common ancestor
-				break; // has to change, it want multiple ancester
-			}
-		}
-		// Next border of B
-		int bnext = bq.dequeue();
-		for (int w: G.adj(bnext)){
-			if (!bMarked[w]){
-				bEdgeTo[w] = bnext;
-				bDistTo[w] = bDistTo[bnext]+1;
-				bMarked[w] = true;
-				bq.enqueue(w);
-			}
-			if (aMarked[w]){ //found common ancestor
-				break; // has to change, it want multiple ancester
-			}
-		}	
-	}	
-
-        return 0;
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
