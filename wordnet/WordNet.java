@@ -3,6 +3,7 @@ import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class WordNet {
@@ -87,5 +88,22 @@ public class WordNet {
         String hypernyms = args[1];
         WordNet wn = new WordNet(synsets, hypernyms);
 
+        int a, d;
+
+        Integer A[] = { 13, 23, 24 };
+        Integer B[] = { 6, 16, 17 };
+        Iterable<Integer> iA = Arrays.asList(A);
+        Iterable<Integer> iB = Arrays.asList(B);
+
+        a = wn.sap.ancestor(iA, iB);
+        d = wn.sap.length(iA, iB);
+
+        // // check node 6
+        // a = wn.sap.ancestor(6, 13);
+        // d = wn.sap.length(6, 13);
+
+        System.out.println(":: Dist: " + d + "Ancestor: " + a);
+
+        // System.out.println("Dist: " + d + "Ancestor: " + a);
     }
 }

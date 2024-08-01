@@ -52,35 +52,42 @@ public class SAP {
         vq.enqueue(v);
         wq.enqueue(w);
 
-        while (!vq.isEmpty() && !wq.isEmpty()) {
+        while (!vq.isEmpty() || !wq.isEmpty()) {
             // Next border of v
-            int vnext = vq.dequeue();
-            for (int x : G.adj(vnext)) {
-                if (!vMarked[x]) {
-                    // vEdgeTo[x] = vnext;
-                    vDistTo[x] = vDistTo[vnext] + 1;
-                    vMarked[x] = true;
-                    vq.enqueue(x);
-                }
-                if (wMarked[x]) { // found common ancestor
-                    distAndId[0] = vDistTo[x] + wDistTo[x];
-                    distAndId[1] = x;
-                    return distAndId;
+            if (!vq.isEmpty()) {
+                int vnext = vq.dequeue();
+                for (int x : G.adj(vnext)) {
+                    if (!vMarked[x]) {
+                        // vEdgeTo[x] = vnext;
+                        vDistTo[x] = vDistTo[vnext] + 1;
+                        vMarked[x] = true;
+                        vq.enqueue(x);
+                        // System.out.println("From: " + vnext + " Explore: " + x);
+                    }
+                    if (wMarked[x]) { // found common ancestor
+                        distAndId[0] = vDistTo[x] + wDistTo[x];
+                        distAndId[1] = x;
+                        return distAndId;
+                    }
                 }
             }
             // Next border of w
-            int wnext = wq.dequeue();
-            for (int x : G.adj(wnext)) {
-                if (!wMarked[x]) {
-                    // wEdgeTo[x] = wnext;
-                    wDistTo[x] = wDistTo[wnext] + 1;
-                    wMarked[x] = true;
-                    wq.enqueue(x);
-                }
-                if (vMarked[x]) { // found common ancestor
-                    distAndId[0] = vDistTo[x] + wDistTo[x];
-                    distAndId[1] = x;
-                    return distAndId;
+            if (!wq.isEmpty()) {
+                int wnext = wq.dequeue();
+                for (int x : G.adj(wnext)) {
+                    if (!wMarked[x]) {
+                        // wEdgeTo[x] = wnext;
+                        wDistTo[x] = wDistTo[wnext] + 1;
+                        wMarked[x] = true;
+                        wq.enqueue(x);
+                        // System.out.println("From: " + wnext + " Explore: " + x);
+
+                    }
+                    if (vMarked[x]) { // found common ancestor
+                        distAndId[0] = vDistTo[x] + wDistTo[x];
+                        distAndId[1] = x;
+                        return distAndId;
+                    }
                 }
             }
         }
@@ -113,6 +120,8 @@ public class SAP {
                 did = findAncestor(iv, iw);
                 currentLength = did[0];
                 currentAncestor = did[1];
+                // System.out.println("Node: " + iv + "&" + iw + "Anc: " + currentAncestor + "Length: "
+                //                           + currentLength);
                 if (currentLength < shortestLength) {
                     shortestLength = currentLength;
                     shortestAncestor = currentAncestor;
@@ -122,13 +131,12 @@ public class SAP {
         if (shortestLength == Integer.MAX_VALUE) { // no common ancestor
             distAndId[0] = -1;
             distAndId[1] = -1;
-            return distAndId;
         }
         else {
             distAndId[0] = shortestLength;
             distAndId[1] = shortestAncestor;
-            return distAndId;
         }
+        return distAndId;
     }
 
     // do unit testing of this class
