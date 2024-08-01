@@ -65,6 +65,63 @@ public class WordNet {
         if (!isNoun(nounA) || !isNoun(nounB)) {
             throw new IllegalArgumentException("nounA or nounB is not in WordNet");
         }
+	int va = bst.get(nounA);
+	int vb = bst.get(nounB);
+
+	// light-weigth bfs
+	aMarked = new boolean[G.V()];
+	aDistTo = new int[G.V()];
+	aEdgeTo = new int[G.V()];
+	
+	bMarked = new boolean[G.V()];
+	bDistTo = new int[G.V()];
+	bEdgeTo = new int[G.V()];
+	
+	for (int v = 0; v < G.V(); v++){
+		aDistTo[v] = INFINITY;
+		bDistTo[v] = INFINITY;
+	}
+	
+	// alternating bfs
+	
+	Queue<Integer> aq = new Queue<Integer>();
+	Queue<Integer> bq = new Queue<Integer>();
+	aMarked[va] = true;
+	bMarked[vb] = true;
+	aDistTo[va] = 0;
+	bDistTo[vb] = 0;
+
+	aq.enqueue(va);
+	bq.enqueue(vb);
+
+	while (!aq.isEmpty() && !bq.isEmpty()){
+		// Next border of A
+		int anext = aq.dequeue();
+		for (int w: G.adj(anext)){
+			if (!aMarked[w]){
+				aEdgeTo[w] = anext;
+				aDistTo[w] = aDistTo[anext]+1;
+				aMarked[w] = true;
+				aq.enqueue(w);
+			}
+			if (bMarked[w]){ //found common ancestor
+				break; // has to change, it want multiple ancester
+			}
+		}
+		// Next border of B
+		int bnext = bq.dequeue();
+		for (int w: G.adj(bnext)){
+			if (!bMarked[w]){
+				bEdgeTo[w] = bnext;
+				bDistTo[w] = bDistTo[bnext]+1;
+				bMarked[w] = true;
+				bq.enqueue(w);
+			}
+			if (aMarked[w]){ //found common ancestor
+				break; // has to change, it want multiple ancester
+			}
+		}	
+	}	
 
         return 0;
     }
