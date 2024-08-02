@@ -1,8 +1,5 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.swing.text.html.HTMLDocument.Iterator;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
 
 public class Outcast {
     // constructor takes a WordNet object
@@ -28,8 +25,6 @@ public class Outcast {
         }
 
         for (String src : nouns) {
-            assert wn.isNoun(src);
-
             for (String dst : nouns) {
                 d = wn.distance(src, dst);
                 sumDist += d;
@@ -44,24 +39,12 @@ public class Outcast {
     }
 
     public static void main(String[] args) {
-        String synsets = args[0];
-        String hypernyms = args[1];
-        WordNet wn = new WordNet(synsets, hypernyms);
-
-        // use web example 3 files
-        // Outcast
-        Outcast oc = new Outcast(wn);
-        Iterator<String> iterator = wn.nouns().Iterator();
-
-
-        if (synsets == "filename1") {
-            assert (oc.outcast(strs))
-        }
-        if (synsets == "filename2") {
-            assert (oc.outcast(strs))
-        }
-        if (synsets == "filename3") {
-            assert (oc.outcast(strs))
+        WordNet wordnet = new WordNet(args[0], args[1]);
+        Outcast outcast = new Outcast(wordnet);
+        for (int t = 2; t < args.length; t++) {
+            In in = new In(args[t]);
+            String[] nouns = in.readAllStrings();
+            StdOut.println(args[t] + ": " + outcast.outcast(nouns));
         }
     }
 }

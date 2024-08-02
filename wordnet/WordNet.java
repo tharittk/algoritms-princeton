@@ -1,16 +1,18 @@
-import edu.princeton.cs.algs4.BST;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 public class WordNet {
-    private BST<String, Integer> bst;
+    private HashMap<String, Integer> bst;
     private HashMap<Integer, String> hmap;
     private Digraph G;
     private SAP sap;
+
+    private ArrayList<String> keys;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -23,16 +25,24 @@ public class WordNet {
 
         // Use BST (k,v) = (noun, vertex id) for O(log n) search
         // and hmap for search noun for a given vertex number
-        bst = new BST<String, Integer>();
+        // bst = new BST<String, Integer>();
+        bst = new HashMap<String, Integer>();
         hmap = new HashMap<Integer, String>();
+        keys = new ArrayList<String>();
 
         String[] fields;
         int count = 0;
         while (inSyn.hasNextLine()) {
             String line = inSyn.readLine();
             fields = line.split(",");
-            bst.put(fields[1], Integer.parseInt(fields[0]));
+
+            String[] inSynset = fields[1].split("\\s+");
+            for (String word : inSynset) {
+                bst.put(word, Integer.parseInt(fields[0]));
+            }
+            // bst.put(fields[1], Integer.parseInt(fields[0]));
             hmap.put(Integer.parseInt(fields[0]), fields[1]);
+            keys.add(fields[1]);
             count++;
         }
         // Build Direct Graph from vertices
@@ -66,7 +76,8 @@ public class WordNet {
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
-        return bst.keys();
+        // return bst.keys();
+        return keys;
     }
 
     // is the word a WordNet noun?
@@ -110,100 +121,80 @@ public class WordNet {
         String synsets = args[0];
         String hypernyms = args[1];
         WordNet wn = new WordNet(synsets, hypernyms);
-
-        int a, d;
-
-        Integer A[] = { 13, 23, 24 };
-        Integer B[] = { 6, 16, 17 };
-        Iterable<Integer> iA = Arrays.asList(A);
-        Iterable<Integer> iB = Arrays.asList(B);
-
-        a = wn.sap.ancestor(iA, iB);
-        d = wn.sap.length(iA, iB);
-        System.out.println(":: Dist: " + d + "Ancestor: " + a);
-
         // Unit test
-        // isNoun
-        assert (!wn.isNoun("wisdflfxx"));
-        // isNoun - noun is not in graph
-        // isnoun - noun is in graph
+
+        // wordNet.isNoun: non-valid input
+        assert (!wn.isNoun("zz"));
+        // wordNet.isNoun: valid input
         assert (wn.isNoun("a"));
-        // distance
-        // distnace - noun is null
+        // wordNet.distance: null input
         try {
-            int t = wn.distance(null, "a");
+            wn.distance(null, "a");
             System.out.println("Should not be here: nouns is null");
-        } catch (Exception e) {
-            continue;
         }
-        // distance - nous is not in graph
+        catch (IllegalArgumentException e) {
+        }
+        // wordNet.distance: input outside range
         try {
-            int t = wn.distance("zz", "a");
+            wn.distance("zz", "a");
             System.out.println("Should not be here: nouns is not in graph");
-        } catch (Exception e) {
-            continue;
         }
-        // distance - valid
-        assert (wn.distance("a", "c") == 2);
-        // distance - two disconnected graph
-        assert (wn.distance("a", "bb") == -1);
-
-        // sap
-        // sap - noun is null
+        catch (IllegalArgumentException e) {
+        }
+        // wordNet.distance: valid input
+        assert (wn.distance("n", "i") == 3);
+        // wordNet.sap: null input
         try {
-            String s = wn.sap(null, "a");
+            wn.sap(null, "a");
             System.out.println("Should not be here: nouns is null");
-        } catch (Exception e) {
-            continue;
         }
-        // sap - nous is not in graph
+        catch (IllegalArgumentException e) {
+        }
+        // wordNet.sap: input outside range
         try {
-            String s = wn.sap("zz", "a");
+            wn.sap("zz", "a");
             System.out.println("Should not be here: nouns is not in graph");
-        } catch (Exception e) {
-            continue;
         }
-        // sap - valid
-        assert (wn.sap("a", "b") == "a");
-        // sap - disconnected graph ?? undefined for hmap (-1)
-        assert (wn.sap("a", "b") == "a");
+        catch (IllegalArgumentException e) {
+        }
+        // wordNet.sap: valid input
+        assert (wn.sap("r", "m").equals("f"));
 
-        // SAP class inside Wordnet
-        int[] did;
-        // length
-        // length - vertex outside range
+        // sap.length: input outside range
         try {
-            wn.sap.length(30, 2);
+            wn.sap.length(27, 2);
             System.out.println("Should not be here: vertex is outside of range");
-        } catch (Exception e) {
-            continue;
         }
-        // length - valid
-        assert (wn.sap.length(5, 2) == 2);
-        // length - same vertex
+        catch (IllegalArgumentException e) {
+        }
+        // sap.length: valid input
+        assert (wn.sap.length(13, 16) == 4);
+        // sap.length: same input
         assert (wn.sap.length(5, 5) == 0);
-        // length - vertex up 1 (direct parent)
-        assert (wn.sap.length(5, 6) == 1);
-        // length - two disconnected graph, return -1
-        assert (wn.sap.length(1, 99) == -1);
-        // ancestor - vertex outside range
+        // sap.length: direct parent input
+        assert (wn.sap.length(5, 2) == 1);
+        // sap.ancestor: input outside range
         try {
             wn.sap.ancestor(30, 2);
             System.out.println("Should not be here: vertex is outside of range");
-        } catch (Exception e) {
-            continue;
         }
-        // ancester - valid
-        assert (wn.sap.ancestor(5, 2) == 0);
-
-        // ancestor - same vertex
+        catch (IllegalArgumentException e) {
+        }
+        // sap.ancestor: valid input
+        assert (wn.sap.ancestor(17, 6) == 2);
+        // sap.ancestor: same input
         assert (wn.sap.ancestor(5, 5) == 5);
-
-        // ancestor - vertex up 1 (direct parent)
-        assert (wn.sap.ancestor(5, 6) == 6);
-
-        // ancestor - two disconnected graph, return -1
-        assert (wn.sap.ancestor(1, 99) == -1);
-
+        // sap.ancestor: direct parent input
+        assert (wn.sap.ancestor(4, 1) == 1);
+        // sap with iterable inputs
+        int k1, k2;
+        Integer[] aa = { 13, 23, 24 };
+        Integer[] bb = { 6, 16, 17 };
+        Iterable<Integer> aa2 = Arrays.asList(aa);
+        Iterable<Integer> bb2 = Arrays.asList(bb);
+        k1 = wn.sap.ancestor(aa2, bb2);
+        k2 = wn.sap.length(aa2, bb2);
+        assert (k1 == 3);
+        assert (k2 == 4);
     }
 }

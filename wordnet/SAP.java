@@ -1,5 +1,8 @@
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
 
@@ -37,6 +40,11 @@ public class SAP {
     private int[] findAncestor(int v, int w) {
 
         int[] distAndId = new int[2];
+        if (v == w) {
+            distAndId[0] = 0;
+            distAndId[1] = v;
+            return distAndId;
+        }
 
         boolean[] vMarked = new boolean[G.V()];
         int[] vDistTo = new int[G.V()];
@@ -145,7 +153,7 @@ public class SAP {
                 if (iv == null || iw == null) {
                     throw new IllegalArgumentException("null vertex exception");
                 }
-                did = findAncestor(iv.intValue(), iw.intValue());
+                did = findAncestor(iv, iw);
                 currentLength = did[0];
                 currentAncestor = did[1];
                 // System.out.println("Node: " + iv + "&" + iw + "Anc: " + currentAncestor +
@@ -160,7 +168,8 @@ public class SAP {
         if (shortestLength == Integer.MAX_VALUE) { // no common ancestor
             distAndId[0] = -1;
             distAndId[1] = -1;
-        } else {
+        }
+        else {
             distAndId[0] = shortestLength;
             distAndId[1] = shortestAncestor;
         }
@@ -169,7 +178,16 @@ public class SAP {
 
     // do unit testing of this class
     public static void main(String[] args) {
-        // See WordNet Unit Test
+        In in = new In(args[0]);
+        Digraph G = new Digraph(in);
+        SAP sap = new SAP(G);
+        while (!StdIn.isEmpty()) {
+            int v = StdIn.readInt();
+            int w = StdIn.readInt();
+            int length = sap.length(v, w);
+            int ancestor = sap.ancestor(v, w);
+            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+        }
     }
 
 }
