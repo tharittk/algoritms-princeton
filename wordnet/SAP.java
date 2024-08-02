@@ -7,18 +7,28 @@ public class SAP {
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
+        if (G == null) {
+            throw new IllegalArgumentException("null graph exception");
+        }
         this.G = G;
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
+        if (v >= this.G.V() || w >= this.G.V()) {
+            throw new IllegalArgumentException("vertex out of range exception");
+        }
         int[] distAndId;
         distAndId = findAncestor(v, w);
         return distAndId[0];
     }
 
-    // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
+    // a common ancestor of v and w that participates in a shortest ancestral path;
+    // -1 if no such path
     public int ancestor(int v, int w) {
+        if (v >= this.G.V() || w >= this.G.V()) {
+            throw new IllegalArgumentException("vertex out of range exception");
+        }
         int[] distAndId;
         distAndId = findAncestor(v, w);
         return distAndId[1];
@@ -96,32 +106,51 @@ public class SAP {
         return distAndId;
     }
 
-    // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
+    // length of shortest ancestral path between any vertex in v and any vertex in
+    // w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
+        if (v == null || w == null) {
+            throw new IllegalArgumentException("null vertex exception");
+        }
+
+        // CHECK IF ANY ELEMENT CONTAINS NULL
+
         int[] dd = findAncestorMany(v, w);
         return dd[0];
     }
 
-    // a common ancestor that participates in shortest ancestral path; -1 if no such path
+    // a common ancestor that participates in shortest ancestral path; -1 if no such
+    // path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+        if (v == null || w == null) {
+            throw new IllegalArgumentException("null vertex exception");
+        }
+
         int[] dd = findAncestorMany(v, w);
         return dd[1];
     }
 
-    public int[] findAncestorMany(Iterable<Integer> v, Iterable<Integer> w) {
+    private int[] findAncestorMany(Iterable<Integer> v, Iterable<Integer> w) {
+        if (v == null || w == null) {
+            throw new IllegalArgumentException("null vertex exception");
+        }
         int[] distAndId = new int[2];
         int shortestLength = Integer.MAX_VALUE;
         int shortestAncestor = Integer.MAX_VALUE;
         int currentLength;
         int currentAncestor;
         int[] did;
-        for (int iv : v) {
-            for (int iw : w) {
-                did = findAncestor(iv, iw);
+        for (Integer iv : v) {
+            for (Integer iw : w) {
+                if (iv == null || iw == null) {
+                    throw new IllegalArgumentException("null vertex exception");
+                }
+                did = findAncestor(iv.intValue(), iw.intValue());
                 currentLength = did[0];
                 currentAncestor = did[1];
-                // System.out.println("Node: " + iv + "&" + iw + "Anc: " + currentAncestor + "Length: "
-                //                           + currentLength);
+                // System.out.println("Node: " + iv + "&" + iw + "Anc: " + currentAncestor +
+                // "Length: "
+                // + currentLength);
                 if (currentLength < shortestLength) {
                     shortestLength = currentLength;
                     shortestAncestor = currentAncestor;
@@ -131,8 +160,7 @@ public class SAP {
         if (shortestLength == Integer.MAX_VALUE) { // no common ancestor
             distAndId[0] = -1;
             distAndId[1] = -1;
-        }
-        else {
+        } else {
             distAndId[0] = shortestLength;
             distAndId[1] = shortestAncestor;
         }

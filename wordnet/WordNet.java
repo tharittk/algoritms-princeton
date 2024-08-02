@@ -51,13 +51,16 @@ public class WordNet {
 
         // check cycle
         DirectedCycle dc = new DirectedCycle(G);
-        if (dc.hasCycle()) throw new IllegalArgumentException("G has a cycle");
+        if (dc.hasCycle())
+            throw new IllegalArgumentException("G has a cycle");
         // check one root
         int countRoot = 0;
         for (int i = 0; i < count; i++) {
-            if (G.outdegree(i) == 0) countRoot++;
+            if (G.outdegree(i) == 0)
+                countRoot++;
         }
-        if (countRoot > 1) throw new IllegalArgumentException("More than one root");
+        if (countRoot > 1)
+            throw new IllegalArgumentException("More than one root");
 
     }
 
@@ -68,17 +71,37 @@ public class WordNet {
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
+        if (word == null) {
+            throw new IllegalArgumentException("null word input");
+        }
         return (bst.get(word) != null);
     }
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
+        if (nounA == null || nounB == null) {
+            throw new IllegalArgumentException("null word input");
+        }
+
+        if (!isNoun(nounA) || !isNoun(nounB)) {
+            throw new IllegalArgumentException("noun is not in universe");
+        }
+
         return this.sap.length(bst.get(nounA), bst.get(nounB));
     }
 
-    // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
+    // a synset (second field of synsets.txt) that is the common ancestor of nounA
+    // and nounB
     // in a shortest ancestral path (defined below)
     public String sap(String nounA, String nounB) {
+        if (nounA == null || nounB == null) {
+            throw new IllegalArgumentException("null word input");
+        }
+
+        if (!isNoun(nounA) || !isNoun(nounB)) {
+            throw new IllegalArgumentException("noun is not in universe");
+        }
+
         return hmap.get(this.sap.ancestor(bst.get(nounA), bst.get(nounB)));
     }
 
