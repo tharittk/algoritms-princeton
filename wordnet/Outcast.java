@@ -1,4 +1,8 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
 
 public class Outcast {
     // constructor takes a WordNet object
@@ -30,7 +34,6 @@ public class Outcast {
                 d = wn.distance(src, dst);
                 sumDist += d;
             }
-
             if (sumDist > sumDistMax) {
                 sumDistMax = sumDist;
                 smax = src;
@@ -41,6 +44,24 @@ public class Outcast {
     }
 
     public static void main(String[] args) {
+        String synsets = args[0];
+        String hypernyms = args[1];
+        WordNet wn = new WordNet(synsets, hypernyms);
 
+        // use web example 3 files
+        // Outcast
+        Outcast oc = new Outcast(wn);
+        Iterator<String> iterator = wn.nouns().Iterator();
+
+
+        if (synsets == "filename1") {
+            assert (oc.outcast(strs))
+        }
+        if (synsets == "filename2") {
+            assert (oc.outcast(strs))
+        }
+        if (synsets == "filename3") {
+            assert (oc.outcast(strs))
+        }
     }
 }

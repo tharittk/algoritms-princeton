@@ -120,13 +120,90 @@ public class WordNet {
 
         a = wn.sap.ancestor(iA, iB);
         d = wn.sap.length(iA, iB);
-
-        // // check node 6
-        // a = wn.sap.ancestor(6, 13);
-        // d = wn.sap.length(6, 13);
-
         System.out.println(":: Dist: " + d + "Ancestor: " + a);
 
-        // System.out.println("Dist: " + d + "Ancestor: " + a);
+        // Unit test
+        // isNoun
+        assert (!wn.isNoun("wisdflfxx"));
+        // isNoun - noun is not in graph
+        // isnoun - noun is in graph
+        assert (wn.isNoun("a"));
+        // distance
+        // distnace - noun is null
+        try {
+            int t = wn.distance(null, "a");
+            System.out.println("Should not be here: nouns is null");
+        } catch (Exception e) {
+            continue;
+        }
+        // distance - nous is not in graph
+        try {
+            int t = wn.distance("zz", "a");
+            System.out.println("Should not be here: nouns is not in graph");
+        } catch (Exception e) {
+            continue;
+        }
+        // distance - valid
+        assert (wn.distance("a", "c") == 2);
+        // distance - two disconnected graph
+        assert (wn.distance("a", "bb") == -1);
+
+        // sap
+        // sap - noun is null
+        try {
+            String s = wn.sap(null, "a");
+            System.out.println("Should not be here: nouns is null");
+        } catch (Exception e) {
+            continue;
+        }
+        // sap - nous is not in graph
+        try {
+            String s = wn.sap("zz", "a");
+            System.out.println("Should not be here: nouns is not in graph");
+        } catch (Exception e) {
+            continue;
+        }
+        // sap - valid
+        assert (wn.sap("a", "b") == "a");
+        // sap - disconnected graph ?? undefined for hmap (-1)
+        assert (wn.sap("a", "b") == "a");
+
+        // SAP class inside Wordnet
+        int[] did;
+        // length
+        // length - vertex outside range
+        try {
+            wn.sap.length(30, 2);
+            System.out.println("Should not be here: vertex is outside of range");
+        } catch (Exception e) {
+            continue;
+        }
+        // length - valid
+        assert (wn.sap.length(5, 2) == 2);
+        // length - same vertex
+        assert (wn.sap.length(5, 5) == 0);
+        // length - vertex up 1 (direct parent)
+        assert (wn.sap.length(5, 6) == 1);
+        // length - two disconnected graph, return -1
+        assert (wn.sap.length(1, 99) == -1);
+        // ancestor - vertex outside range
+        try {
+            wn.sap.ancestor(30, 2);
+            System.out.println("Should not be here: vertex is outside of range");
+        } catch (Exception e) {
+            continue;
+        }
+        // ancester - valid
+        assert (wn.sap.ancestor(5, 2) == 0);
+
+        // ancestor - same vertex
+        assert (wn.sap.ancestor(5, 5) == 5);
+
+        // ancestor - vertex up 1 (direct parent)
+        assert (wn.sap.ancestor(5, 6) == 6);
+
+        // ancestor - two disconnected graph, return -1
+        assert (wn.sap.ancestor(1, 99) == -1);
+
     }
 }
