@@ -2,9 +2,7 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Outcast {
-    // constructor takes a WordNet object
-
-    private WordNet wn;
+    private final WordNet wn;
 
     public Outcast(WordNet wordnet) {
         this.wn = wordnet;
@@ -23,7 +21,7 @@ public class Outcast {
                 throw new IllegalArgumentException("null string in input");
             }
         }
-
+        // main loop
         for (String src : nouns) {
             for (String dst : nouns) {
                 d = wn.distance(src, dst);

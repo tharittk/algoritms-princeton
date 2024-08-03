@@ -6,7 +6,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
 
-    private Digraph G;
+    private final Digraph G;
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
@@ -70,47 +70,54 @@ public class SAP {
         vq.enqueue(v);
         wq.enqueue(w);
 
-        while (!vq.isEmpty() || !wq.isEmpty()) {
-            // Next border of v
-            if (!vq.isEmpty()) {
-                int vnext = vq.dequeue();
-                for (int x : G.adj(vnext)) {
-                    if (!vMarked[x]) {
-                        // vEdgeTo[x] = vnext;
-                        vDistTo[x] = vDistTo[vnext] + 1;
-                        vMarked[x] = true;
-                        vq.enqueue(x);
-                        // System.out.println("From: " + vnext + " Explore: " + x);
-                    }
-                    if (wMarked[x]) { // found common ancestor
-                        distAndId[0] = vDistTo[x] + wDistTo[x];
-                        distAndId[1] = x;
-                        return distAndId;
-                    }
-                }
-            }
-            // Next border of w
-            if (!wq.isEmpty()) {
-                int wnext = wq.dequeue();
-                for (int x : G.adj(wnext)) {
-                    if (!wMarked[x]) {
-                        // wEdgeTo[x] = wnext;
-                        wDistTo[x] = wDistTo[wnext] + 1;
-                        wMarked[x] = true;
-                        wq.enqueue(x);
-                        // System.out.println("From: " + wnext + " Explore: " + x);
-
-                    }
-                    if (vMarked[x]) { // found common ancestor
-                        distAndId[0] = vDistTo[x] + wDistTo[x];
-                        distAndId[1] = x;
-                        return distAndId;
-                    }
+        // bfs of v
+        while (!vq.isEmpty()) {
+            int vnext = vq.dequeue();
+            for (int x : G.adj(vnext)) {
+                if (!vMarked[x]) {
+                    // vEdgeTo[x] = vnext;
+                    vDistTo[x] = vDistTo[vnext] + 1;
+                    vMarked[x] = true;
+                    vq.enqueue(x);
                 }
             }
         }
-        distAndId[0] = -1;
-        distAndId[1] = -1;
+        // bfs of w
+        while (!wq.isEmpty()) {
+            int wnext = wq.dequeue();
+            for (int x : G.adj(wnext)) {
+                if (!wMarked[x]) {
+                    // wEdgeTo[x] = wnext;
+                    wDistTo[x] = wDistTo[wnext] + 1;
+                    wMarked[x] = true;
+                    wq.enqueue(x);
+                }
+            }
+        }
+
+        // find smallest sum
+        int smallestSum = Integer.MAX_VALUE;
+        int ancestor = -1;
+        int cd;
+        for (int i = 0; i < G.V(); i++) {
+            if (vMarked[i] && wMarked[i]) {
+                cd = vDistTo[i] + wDistTo[i];
+                if (cd < smallestSum) {
+                    smallestSum = cd;
+                    ancestor = i;
+                }
+            }
+        }
+
+        if (smallestSum == Integer.MAX_VALUE) {
+            distAndId[0] = -1;
+            distAndId[1] = -1;
+        }
+        else {
+            distAndId[0] = smallestSum;
+            distAndId[1] = ancestor;
+        }
+
         return distAndId;
     }
 
@@ -120,8 +127,6 @@ public class SAP {
         if (v == null || w == null) {
             throw new IllegalArgumentException("null vertex exception");
         }
-
-        // CHECK IF ANY ELEMENT CONTAINS NULL
 
         int[] dd = findAncestorMany(v, w);
         return dd[0];
@@ -156,9 +161,6 @@ public class SAP {
                 did = findAncestor(iv, iw);
                 currentLength = did[0];
                 currentAncestor = did[1];
-                // System.out.println("Node: " + iv + "&" + iw + "Anc: " + currentAncestor +
-                // "Length: "
-                // + currentLength);
                 if (currentLength < shortestLength) {
                     shortestLength = currentLength;
                     shortestAncestor = currentAncestor;
