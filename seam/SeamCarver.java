@@ -11,7 +11,7 @@ public class SeamCarver {
     public SeamCarver(Picture picture) {
         this.pic = picture;
         this.energies = new double[pic.width()][pic.height()];
-        this.computeEnergyAll();
+        this.computeEergyAll();
     }
 
     // current picture
@@ -80,61 +80,46 @@ public class SeamCarver {
     public int[] findVerticalSeam() {
         int[] currentPath = new int[this.height()];
         int[] minEPath = new int[this.height()];
-        double minE = Double.POSITIVE_INFINITY;
-        double currentSumE = 0;
-        for (int col = 0; col < this.width(); col++) {
-            int rowCount = 1;
-            int currentCol = col;
-            minEPath[rowCount] = currentCol;
-            while (rowCount < this.height()) {
-                // beware of edge (only two neighbor ! -- fix later)
-                int minId = findSmallest(this.energies[currentCol - 1][rowCount],
-                                         this.energies[currentCol][rowCount],
-                                         this.energies[currentCol + 1][rowCount]);
+        double minSumE = Double.POSITIVE_INFINITY;
 
-                if (minId == 1) {
-                    currentSumE += this.energies[currentCol - 1][rowCount];
-                    currentCol = currentCol - 1;
-                }
-                else if (minId == 2) {
-                    currentSumE += this.energies[currentCol][rowCount];
-                    // maintain same current cor
-                }
-                else if (minId == 3) {
-                    currentSumE += this.energies[currentCol + 1][rowCount];
-                    currentCol = currentCol + 1;
-                }
-                else {
-                    throw new RuntimeException("SP not in 3 descendent !");
-                }
-                currentPath[rowCount] = currentCol;
+        for (int col = 0; col < this.width(); col++) {
+	    double currentSumE = 0;
+            currentPath[0] = col;
+	    int currentCol = col;
+            int rowCount = 1;
+	    // fill the path
+	    while (rowCount < this.height()) {
+                
+		if (currentCol == 0){ // left edge
+			int[] offsets = {0, 1};
+		} else if (currentCol == (this.width() - 1){// right edge
+			int[] offsets = {-1, 0};
+		} else { // interior
+			int[] offsets = {-1, 0, 1};
+		}
+		// next edge that has the lowest energy
+		int minECol = currentCol;
+		int E = Integer.MAX_VALUE;
+	      	int minE = Integer.MAX_VALUE;
+		for (int offset : offsets){
+			E = this.energies[currentCol + offset][rowCount];
+			if (E < minE){
+				minE = E;
+				minECol = currentCol + offset;	
+			}
+		}
+		currentSumE += minE
+		currentPath[rowCount] = minECol;
+		// for next iteration
+		currentCol = minECol;
                 rowCount++;
             }
-            if (currentSumE < minE) {
-                minE = currentSumE;
+            if (currentSumE < minSumE) {
+                minSumE = currentSumE;
                 minEPath = Arrays.copyOf(currentPath, currentPath.length); // we reused currentPath
             }
         }
         return minEPath;
-    }
-
-
-    private static int findSmallest(double a, double b, double c) {
-        double min = Math.min(a, b);
-        double acutalMin = Math.min(min, c);
-
-        if (Double.compare(acutalMin, a) == 0) {
-            return 1;
-        }
-        else if (Double.compare(acutalMin, b) == 0) {
-            return 2;
-        }
-        else if (Double.compare(acutalMin, c) == 0) {
-            return 3;
-        }
-        else {
-            throw new RuntimeException("Comparison of 3 broken !");
-        }
     }
 
 
