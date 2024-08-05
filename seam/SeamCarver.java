@@ -2,21 +2,21 @@ import edu.princeton.cs.algs4.Picture;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.List;
 
 public class SeamCarver {
-    private final Picture pic;
-    private Picture picT;
+    private Picture pic, picT;
     private double[][] energies, energiesT;
 
-    boolean inTranspose = false;
-    boolean hasTranspose = false;
+    private boolean inTranspose = false;
+    private boolean hasTranspose = false;
 
     // create a seam carver object based on the given picture
 
     public SeamCarver(Picture picture) {
         this.pic = picture;
         this.energies = new double[pic.width()][pic.height()];
-        this.computeEergyAll();
+        this.computeEnergyAll();
 
     }
 
@@ -96,24 +96,27 @@ public class SeamCarver {
             currentPath[0] = col;
             int currentCol = col;
             int rowCount = 1;
+            List<Integer> offsets;
             // fill the path
             while (rowCount < this.height()) {
 
                 if (currentCol == 0) { // left edge
-                    int[] offsets = { 0, 1 };
-                } else if (currentCol == (this.width() - 1)) {// right edge
-                    int[] offsets = { -1, 0 };
-                } else { // interior
-                    int[] offsets = { -1, 0, 1 };
+                    offsets = Arrays.asList(0, 1);
+                }
+                else if (currentCol == (this.width() - 1)) { // right edge
+                    offsets = Arrays.asList(-1, 0);
+                }
+                else { // interior
+                    offsets = Arrays.asList(-1, 0, 1);
                 }
                 // next edge that has the lowest energy
                 int minECol = currentCol;
-                double E = Integer.MAX_VALUE;
+                double e;
                 double minE = Integer.MAX_VALUE;
                 for (int offset : offsets) {
-                    E = energy(currentCol + offset, rowCount);
-                    if (E < minE) {
-                        minE = E;
+                    e = energy(currentCol + offset, rowCount);
+                    if (e < minE) {
+                        minE = e;
                         minECol = currentCol + offset;
                     }
                 }
@@ -131,24 +134,24 @@ public class SeamCarver {
         return minEPath;
     }
 
-    private Picture getPicTranpose(Picture pic) {
-        Picture picT = new Picture(pic.height(), pic.width());
-        for (int col = 0; col < pic.width(); col++) {
-            for (int row = 0; row < pic.height(); row++) {
-                picT.setRGB(row, col, pic.getRGB(col, row));
+    private Picture getPicTranspose(Picture picture) {
+        Picture pictureT = new Picture(picture.height(), picture.width());
+        for (int col = 0; col < picture.width(); col++) {
+            for (int row = 0; row < picture.height(); row++) {
+                pictureT.setRGB(row, col, picture.getRGB(col, row));
             }
         }
-        return picT;
+        return pictureT;
     }
 
-    private double[][] getEnergyTranspose(double[][] energies) {
-        double[][] energiesT = new double[energies.length][energies[0].length];
-        for (int col = 0; col < energies.length; col++) {
-            for (int row = 0; row < energies[0].length; row++) {
-                energiesT[row][col] = energies[col][row];
+    private double[][] getEnergyTranspose(double[][] e) {
+        double[][] eT = new double[e[0].length][e.length];
+        for (int col = 0; col < e.length; col++) {
+            for (int row = 0; row < e[0].length; row++) {
+                eT[row][col] = e[col][row];
             }
         }
-        return energiesT;
+        return eT;
     }
 
     private void turnTransposeOn() {
@@ -185,8 +188,6 @@ public class SeamCarver {
 
         this.pic = this.picT;
         this.picT = tmpPic;
-    }
-
     }
 
     // remove horizontal seam from current picture
