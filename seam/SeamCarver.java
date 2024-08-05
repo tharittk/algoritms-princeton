@@ -82,10 +82,13 @@ public class SeamCarver {
         if (!inTranspose) {
             turnTransposeOn();
         }
-        return findVerticalSeam();
+        int[] seam = findVerticalSeam();
+        turnTransposeOff();
+        return seam;
     }
 
     // sequence of indices for vertical seam
+    // fail 7x10 && 10x10 -- your approach is somewhat greedy... wrong
     public int[] findVerticalSeam() {
         int[] currentPath = new int[this.height()];
         int[] minEPath = new int[this.height()];
