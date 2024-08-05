@@ -5,13 +5,15 @@ import java.util.Arrays;
 
 public class SeamCarver {
     private final Picture pic;
-    private double[][] energies;
-
+    private Picutre picT;
+    private double[][] energies, energiesT;
+    
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
         this.pic = picture;
         this.energies = new double[pic.width()][pic.height()];
         this.computeEergyAll();
+	
     }
 
     // current picture
@@ -102,7 +104,7 @@ public class SeamCarver {
 		int E = Integer.MAX_VALUE;
 	      	int minE = Integer.MAX_VALUE;
 		for (int offset : offsets){
-			E = this.energies[currentCol + offset][rowCount];
+			E = energy(currentCol + offset, rowCount);
 			if (E < minE){
 				minE = E;
 				minECol = currentCol + offset;	
@@ -121,6 +123,29 @@ public class SeamCarver {
         }
         return minEPath;
     }
+
+
+    private Picutre getPicTranpose(Picture pic){
+	    Picutre picT = new Picutre(pic.height(), pic.width());
+	    for (int col = 0; col < pic.width(); col++){
+		    for (int row = 0; row < pic.height(); row++) {
+			    picT.setRGB(row, col, pic.getRGB(col, row));
+		    }
+	    }
+	    return picT;
+    }
+
+
+    private double[][] getEnergyTranpose(double[][] energies){
+	    double[][] energiesT = new double(energies.length, energies[0].length);
+	    for (int col = 0; col < energies.length; col++){
+		    for (int row = 0; row < energies[0].length(); row++) {
+			    energiesT[row][col] = energies[col][row];
+		    }
+	    }
+	    return energiesT;
+    }
+
 
 
     // remove horizontal seam from current picture
