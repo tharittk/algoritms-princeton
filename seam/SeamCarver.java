@@ -12,7 +12,6 @@ public class SeamCarver {
     private boolean hasTranspose = false;
 
     // create a seam carver object based on the given picture
-
     public SeamCarver(Picture picture) {
         this.pic = picture;
         this.energies = new double[pic.width()][pic.height()];
@@ -90,51 +89,84 @@ public class SeamCarver {
     // sequence of indices for vertical seam
     // fail 7x10 && 10x10 -- your approach is somewhat greedy... wrong
     public int[] findVerticalSeam() {
-        int[] currentPath = new int[this.height()];
-        int[] minEPath = new int[this.height()];
-        double minSumE = Double.POSITIVE_INFINITY;
+	    int[] path =  new int[this.height()];
+	    int[] minEPath = new int[this.height()];
+	    double minE = Double.MAX_VALUE;
+	    double E;
 
-        for (int col = 0; col < this.width(); col++) {
-            double currentSumE = 0;
-            currentPath[0] = col;
-            int currentCol = col;
-            int rowCount = 1;
-            List<Integer> offsets;
-            // fill the path
-            while (rowCount < this.height()) {
+	    for (int col = 0; col < this.width(); col++ {
+		    path[0] = col;
+		    E = doDP (col, 1, path);
+		    if( E < minE){
+			    minE = E;
+		    	    minEPath = Arrays.copyOf(path, path.length);
+		    }
+	    
+	    }
+	    return minEPath;
+    }
 
-                if (currentCol == 0) { // left edge
-                    offsets = Arrays.asList(0, 1);
-                }
-                else if (currentCol == (this.width() - 1)) { // right edge
-                    offsets = Arrays.asList(-1, 0);
-                }
-                else { // interior
-                    offsets = Arrays.asList(-1, 0, 1);
-                }
-                // next edge that has the lowest energy
-                int minECol = currentCol;
-                double e;
-                double minE = Integer.MAX_VALUE;
-                for (int offset : offsets) {
-                    e = energy(currentCol + offset, rowCount);
-                    if (e < minE) {
-                        minE = e;
-                        minECol = currentCol + offset;
-                    }
-                }
-                currentSumE += minE;
-                currentPath[rowCount] = minECol;
-                // for next iteration
-                currentCol = minECol;
-                rowCount++;
+    private double doDP(int col, int rowCount, int[] p) {
+        if (rowCount == (this.height)) {
+            return 0;
+        }
+        if (col == 0) { // left edge
+            // offsets = Arrays.asList(0, 1);
+
+            double e1 = energy(col, rowCount) + doDP(col, rowCount + 1, p);
+            double e2 = energy(col + 1, rowCount) + doDP(col + 1, rowCount + 1, p);
+
+            if (e1 < e2) {
+                p[rowCount] = col;
+                return e1;
+            } else {
+                p[rowCount] = col + 1;
+                return e2;
             }
-            if (currentSumE < minSumE) {
-                minSumE = currentSumE;
-                minEPath = Arrays.copyOf(currentPath, currentPath.length); // we reused currentPath
+
+        } else if (col == (this.width() - 1)) { // right edge
+            // offsets = Arrays.asList(-1, 0);
+
+            double e1 = energy(col - 1, rowCount) + doDP(col - 1, rowCount + 1, p);
+            double e2 = energy(col, rowCount) + doDP(col, rowCount + 1, p);
+
+            if (e1 < e2) {
+                p[rowCount] = col - 1;
+                return e1;
+            } else {
+                p[rowCount] = col;
+                return e2;
+            }
+
+        } else { // interior
+                 // offsets = Arrays.asList(-1, 0, 1);
+
+            double e1 = energy(col - 1, rowCount) + doDP(col - 1, rowCount + 1, p);
+            double e2 = energy(col, rowCount) + doDP(col, rowCount + 1, p);
+            double e3 = energy(col + 1, rowCount) + doDP(col + 1, rowCount + 1, p);
+
+            int d1d2 = Double.compare(e1, e2);
+            if (d1d2 < 0) { // e1 < e2
+                int d1d3 = Double.compare(e1, e3);
+                if (d1d3 < 0) { // e1 is minimum
+                    p[rowCount] = col - 1;
+                    return e1;
+                } else { // e3 is minimum
+                    p[rowCount] = col + 1;
+                    return e3;
+                }
+            } else { // e2 < e3
+                int d2d3 = Double.compare(e2, e3);
+                if (d2d3 < 0) { // e2 is minimum
+                    p[rowCount] = col;
+                    return e2;
+                } else { // e3 is minimum
+                    p[rowCount] = col + 1;
+                    return e3;
+                }
             }
         }
-        return minEPath;
+
     }
 
     private Picture getPicTranspose(Picture picture) {
