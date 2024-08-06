@@ -1,8 +1,8 @@
 import edu.princeton.cs.algs4.Picture;
+import edu.princeton.cs.algs4.Queue;
 
 import java.awt.Color;
 import java.util.Arrays;
-import java.util.List;
 
 public class SeamCarver {
     private Picture pic, picT;
@@ -89,86 +89,119 @@ public class SeamCarver {
     // sequence of indices for vertical seam
     // fail 7x10 && 10x10 -- your approach is somewhat greedy... wrong
     public int[] findVerticalSeam() {
-	    int[] path =  new int[this.height()];
-	    int[] minEPath = new int[this.height()];
-	    double minE = Double.MAX_VALUE;
-	    double E;
+        int[] minEPath = new int[this.height()];
+        int[] path = new int[this.height()];
 
-	    for (int col = 0; col < this.width(); col++ {
-		    path[0] = col;
-		    E = doDP (col, 1, path);
-		    if( E < minE){
-			    minE = E;
-		    	    minEPath = Arrays.copyOf(path, path.length);
-		    }
-	    
-	    }
-	    return minEPath;
+        double minE = Double.POSITIVE_INFINITY;
+
+        double[][] eTo = new double[this.width()][this.height()];
+        int[][] colTo = new int[this.width()][this.height()];
+
+
+        for (int src = 0; src < this.width(); src++) {
+            eTo[src][0] = 1000;
+            // init eTo
+            for (int col = 0; col < this.width(); col++) {
+                for (int row = 1; row < this.height(); row++) {
+                    eTo[col][row] = Double.POSITIVE_INFINITY;
+                }
+            }
+            // relax sub node
+            Queue<Integer> q = new Queue<Integer>();
+            int rowCount = 0;
+            q.enqueue(src);
+            while (rowCount < (this.height() - 1)) {
+                int col = q.dequeue();
+                relax(col, rowCount, eTo, colTo);
+
+                if (col == 0) {
+                    q.enqueue(col);
+                    q.enqueue(col + 1);
+                }
+                else if (col == (this.width() - 1)) {
+                    q.enqueue(col - 1);
+                    q.enqueue(col);
+                }
+                else {
+                    q.enqueue(col - 1);
+                    q.enqueue(col);
+                    q.enqueue(col + 1);
+                }
+                rowCount++;
+            }
+
+            // pick min path from last row and track back
+            int minCol = 0;
+            double pathE = Double.POSITIVE_INFINITY;
+
+            for (int col = 0; col < this.width(); col++) {
+                double e = eTo[col][this.height() - 1];
+                // System.out.println("eTo" + col + " |  " + (this.height() - 1) + "::" + e);
+                if (e < pathE) {
+                    pathE = e;
+                    minCol = col;
+                }
+            }
+            // get path
+            path[this.height() - 1] = minCol;
+            for (int row = (this.height() - 1); row > 0; row--) {
+                path[row - 1] = colTo[minCol][row];
+                minCol = colTo[minCol][row];
+            }
+            // compare to other src
+            if (pathE < minE) {
+                minE = pathE;
+                minEPath = Arrays.copyOf(path, path.length);
+            }
+        }
+        return minEPath;
     }
 
-    private double doDP (int col, int rowCount, int[] p){
-	    if (rowCount == (this.height)){
-	    	return 0;
-	    }
-	    if (col == 0) { // left edge
-		//offsets = Arrays.asList(0, 1);
+    private void relax(int col, int row, double[][] eTo, int[][] colTo) {
+        if (col == 0) { // left edge
+            double e1 = energy(col, row + 1) + eTo[col][row];
+            double e2 = energy(col + 1, row + 1) + eTo[col][row];
 
-		double e1 = energy(col, rowCount) + doDP(col, rowCount+1, p);
-		double e2 = energy(col+1, rowCount) + doDP(col+1, rowCount+1, p);
+            if (e1 < eTo[col][row + 1]) {
+                eTo[col][row + 1] = e1;
+                colTo[col][row + 1] = col;
+            }
+            if (e2 < eTo[col + 1][row + 1]) {
+                eTo[col + 1][row + 1] = e2;
+                colTo[col + 1][row + 1] = col;
+            }
+        }
+        else if (col == (this.width() - 1)) { // right edge
+            double e1 = energy(col - 1, row + 1) + eTo[col][row];
+            double e2 = energy(col, row + 1) + eTo[col][row];
 
-		if (e1 < e2){
-			p[rowCount] = col;
-			return e1;
-		} else {
-			p[rowCount = col + 1;
-			return e2;
-		}
-	    
-	    }
-            else if (col == (this.width() - 1)) { // right edge
-		//offsets = Arrays.asList(-1, 0);
+            if (e1 < eTo[col - 1][row + 1]) {
+                eTo[col - 1][row + 1] = e1;
+                colTo[col - 1][row + 1] = col;
+            }
+            if (e2 < eTo[col][row + 1]) {
+                eTo[col][row + 1] = e2;
+                colTo[col][row + 1] = col;
+            }
+        }
+        else {
+            double e1 = energy(col - 1, row + 1) + eTo[col][row];
+            double e2 = energy(col, row + 1) + eTo[col][row];
+            double e3 = energy(col + 1, row + 1) + eTo[col][row];
 
-	   	double e1 = energy(col-1, rowCount) + doDP(col-1, rowCount+1, p);
-	   	double e2 = energy(col, rowCount) + doDP(col, rowCount+1, p);
-	
-		if (e1 < e2){
-			p[rowCount] = col - 1;
-			return e1;
-		} else {
-			p[rowCount] = col;
-			return e2;
-		}
-	          
-	    }
-            else { // interior
-                //offsets = Arrays.asList(-1, 0, 1);
- 
-	   	double e1 = energy(col-1, rowCount) + doDP(col-1, rowCount+1, p);
-	   	double e2 = energy(col, rowCount) + doDP(col, rowCount+1, p);
-		double e3 = energy(col+1, rowCount) + doDP(col+1, rowCount+1, p);
-		
-		int d1d2 = Double.compare (e1, e2);
-		if (d1d2 < 0) { // e1 < e2
-			int d1d3 = Double.compare (e1, e3);
-			if (d1d3 < 0) { // e1 is minimum
-				p[rowCount] = col - 1;
-				return e1;
-			} else { // e3 is minimum
-				p[rowCount] = col + 1;
-				return e3;
-			}
-		} else { // e2 < e3
-			int d2d3 = Double.compare (e2, e3);
-			if (d2d3 < 0) { // e2 is minimum
-				p[rowCount] = col;
-				return e2;
-			} else { // e3 is minimum
-				p[rowCount] = col + 1;
-				return e3;
-			}
-		}
-	    }
-
+            if (e1 < eTo[col - 1][row + 1]) {
+                eTo[col - 1][row + 1] = e1;
+                colTo[col - 1][row + 1] = col;
+            }
+            if (e2 < eTo[col][row + 1]) {
+                eTo[col][row + 1] = e2;
+                colTo[col][row + 1] = col;
+            }
+            if (e3 < eTo[col + 1][row + 1]) {
+                eTo[col + 1][row + 1] = e3;
+                colTo[col + 1][row + 1] = col;
+            }
+        }
     }
 
     private Picture getPicTranspose(Picture picture) {
@@ -232,26 +265,26 @@ public class SeamCarver {
         if (!inTranspose) {
             turnTransposeOn();
         }
-        removeVerticalSeam(int[] seam); 
-	turnTransposeOff();
+        removeVerticalSeam(seam);
+        turnTransposeOff();
     }
 
     public void removeVerticalSeam(int[] seam) {
-	    assert (!inTranspose);
-	    // shift array
-	    for (int row = 0; row < seam.length; row++){
-		    for(int col = seam[row]; col < (this.width() - 1); col++){
-			    this.energies[col][row] = this.energies[col + 1][row];
-		    }
-	    }
+        assert (!inTranspose);
+        // shift array
+        for (int row = 0; row < seam.length; row++) {
+            for (int col = seam[row]; col < (this.width() - 1); col++) {
+                this.energies[col][row] = this.energies[col + 1][row];
+            }
+        }
 
-	    // recalculate energy left and right of the seam
-	    for (int row = 0; row < seam.length; row++){
-		    // lhs of old seam
-		    computeEnergyPixel(seam[row]-1, row);
-		    // rhs of old seam
-		    computeEnergyPixel(seam[row], row);
-	    }
+        // recalculate energy left and right of the seam
+        for (int row = 0; row < seam.length; row++) {
+            // lhs of old seam
+            computeEnergyPixel(seam[row] - 1, row);
+            // rhs of old seam
+            computeEnergyPixel(seam[row], row);
+        }
     }
 
     // unit testing (optional)
