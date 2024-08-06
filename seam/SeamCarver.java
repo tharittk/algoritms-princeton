@@ -106,66 +106,68 @@ public class SeamCarver {
 	    return minEPath;
     }
 
-    private double doDP(int col, int rowCount, int[] p) {
-        if (rowCount == (this.height)) {
-            return 0;
-        }
-        if (col == 0) { // left edge
-            // offsets = Arrays.asList(0, 1);
+    private double doDP (int col, int rowCount, int[] p){
+	    if (rowCount == (this.height)){
+	    	return 0;
+	    }
+	    if (col == 0) { // left edge
+		//offsets = Arrays.asList(0, 1);
 
-            double e1 = energy(col, rowCount) + doDP(col, rowCount + 1, p);
-            double e2 = energy(col + 1, rowCount) + doDP(col + 1, rowCount + 1, p);
+		double e1 = energy(col, rowCount) + doDP(col, rowCount+1, p);
+		double e2 = energy(col+1, rowCount) + doDP(col+1, rowCount+1, p);
 
-            if (e1 < e2) {
-                p[rowCount] = col;
-                return e1;
-            } else {
-                p[rowCount] = col + 1;
-                return e2;
-            }
+		if (e1 < e2){
+			p[rowCount] = col;
+			return e1;
+		} else {
+			p[rowCount = col + 1;
+			return e2;
+		}
+	    
+	    }
+            else if (col == (this.width() - 1)) { // right edge
+		//offsets = Arrays.asList(-1, 0);
 
-        } else if (col == (this.width() - 1)) { // right edge
-            // offsets = Arrays.asList(-1, 0);
-
-            double e1 = energy(col - 1, rowCount) + doDP(col - 1, rowCount + 1, p);
-            double e2 = energy(col, rowCount) + doDP(col, rowCount + 1, p);
-
-            if (e1 < e2) {
-                p[rowCount] = col - 1;
-                return e1;
-            } else {
-                p[rowCount] = col;
-                return e2;
-            }
-
-        } else { // interior
-                 // offsets = Arrays.asList(-1, 0, 1);
-
-            double e1 = energy(col - 1, rowCount) + doDP(col - 1, rowCount + 1, p);
-            double e2 = energy(col, rowCount) + doDP(col, rowCount + 1, p);
-            double e3 = energy(col + 1, rowCount) + doDP(col + 1, rowCount + 1, p);
-
-            int d1d2 = Double.compare(e1, e2);
-            if (d1d2 < 0) { // e1 < e2
-                int d1d3 = Double.compare(e1, e3);
-                if (d1d3 < 0) { // e1 is minimum
-                    p[rowCount] = col - 1;
-                    return e1;
-                } else { // e3 is minimum
-                    p[rowCount] = col + 1;
-                    return e3;
-                }
-            } else { // e2 < e3
-                int d2d3 = Double.compare(e2, e3);
-                if (d2d3 < 0) { // e2 is minimum
-                    p[rowCount] = col;
-                    return e2;
-                } else { // e3 is minimum
-                    p[rowCount] = col + 1;
-                    return e3;
-                }
-            }
-        }
+	   	double e1 = energy(col-1, rowCount) + doDP(col-1, rowCount+1, p);
+	   	double e2 = energy(col, rowCount) + doDP(col, rowCount+1, p);
+	
+		if (e1 < e2){
+			p[rowCount] = col - 1;
+			return e1;
+		} else {
+			p[rowCount] = col;
+			return e2;
+		}
+	          
+	    }
+            else { // interior
+                //offsets = Arrays.asList(-1, 0, 1);
+ 
+	   	double e1 = energy(col-1, rowCount) + doDP(col-1, rowCount+1, p);
+	   	double e2 = energy(col, rowCount) + doDP(col, rowCount+1, p);
+		double e3 = energy(col+1, rowCount) + doDP(col+1, rowCount+1, p);
+		
+		int d1d2 = Double.compare (e1, e2);
+		if (d1d2 < 0) { // e1 < e2
+			int d1d3 = Double.compare (e1, e3);
+			if (d1d3 < 0) { // e1 is minimum
+				p[rowCount] = col - 1;
+				return e1;
+			} else { // e3 is minimum
+				p[rowCount] = col + 1;
+				return e3;
+			}
+		} else { // e2 < e3
+			int d2d3 = Double.compare (e2, e3);
+			if (d2d3 < 0) { // e2 is minimum
+				p[rowCount] = col;
+				return e2;
+			} else { // e3 is minimum
+				p[rowCount] = col + 1;
+				return e3;
+			}
+		}
+	    }
 
     }
 
@@ -227,12 +229,29 @@ public class SeamCarver {
 
     // remove horizontal seam from current picture
     public void removeHorizontalSeam(int[] seam) {
-
+        if (!inTranspose) {
+            turnTransposeOn();
+        }
+        removeVerticalSeam(int[] seam); 
+	turnTransposeOff();
     }
 
-    // remove vertical seam from current picture
     public void removeVerticalSeam(int[] seam) {
+	    assert (!inTranspose);
+	    // shift array
+	    for (int row = 0; row < seam.length; row++){
+		    for(int col = seam[row]; col < (this.width() - 1); col++){
+			    this.energies[col][row] = this.energies[col + 1][row];
+		    }
+	    }
 
+	    // recalculate energy left and right of the seam
+	    for (int row = 0; row < seam.length; row++){
+		    // lhs of old seam
+		    computeEnergyPixel(seam[row]-1, row);
+		    // rhs of old seam
+		    computeEnergyPixel(seam[row], row);
+	    }
     }
 
     // unit testing (optional)
