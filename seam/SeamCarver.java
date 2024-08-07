@@ -3,11 +3,10 @@ import edu.princeton.cs.algs4.Picture;
 import java.awt.Color;
 
 public class SeamCarver {
-    private Picture pic, picT;
-    private double[][] energies, energiesT;
+    private Picture pic;
+    private double[][] energies;
 
     private boolean inTranspose = false;
-    private boolean hasTranspose = false;
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
@@ -83,18 +82,24 @@ public class SeamCarver {
         }
     }
 
+    public int[] findVerticalSeam() {
+        return findSeam(true);
+    }
+
     // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
-        if (!inTranspose) {
-            turnTransposeOn();
-        }
-        int[] seam = findVerticalSeam();
-        turnTransposeOff();
-        return seam;
+        return findSeam(false);
     }
 
     // sequence of indices for vertical seam
-    public int[] findVerticalSeam() {
+    private int[] findSeam(boolean vertical) {
+        if (vertical) {
+            if (inTranspose) turnTransposeOff();
+        }
+        else {
+            if (!inTranspose) turnTransposeOn();
+        }
+
         int[][] edgeTo = new int[this.width()][this.height()];
         double[][] distTo = new double[this.width()][this.height()];
         for (int row = 0; row < this.height(); row++) {
@@ -144,7 +149,10 @@ public class SeamCarver {
             minCol = edgeTo[minCol][row];
             minESeam[row - 1] = minCol;
         }
-
+        // I DON"T LIKE THIS... HOWEVER, if we don't do this, the image will never return to original state
+        if (!vertical) {
+            turnTransposeOff();
+        }
         return minESeam;
     }
 
@@ -169,78 +177,55 @@ public class SeamCarver {
     }
 
     private void turnTransposeOn() {
-        // switching to transpose by exchanging pointer
-        if (!hasTranspose) {
-            this.picT = getPicTranspose(this.pic);
-            this.energiesT = getEnergyTranspose(this.energies);
-            hasTranspose = true;
-        }
-
         if (!inTranspose) {
-            swapPicAndEPointer();
-            inTranspose = true;
+            this.pic = getPicTranspose(this.pic);
+            this.energies = getEnergyTranspose(this.energies);
         }
+        inTranspose = true;
     }
 
     private void turnTransposeOff() {
-        assert (hasTranspose);
-        // swap pointer
         if (inTranspose) {
-            swapPicAndEPointer();
-            inTranspose = false;
+            this.pic = getPicTranspose(this.pic);
+            this.energies = getEnergyTranspose(this.energies);
         }
+        inTranspose = false;
     }
 
-    // swap Pic and Energy pointer so that everything in findVerticalSeam works
-    // flawlessly
-    private void swapPicAndEPointer() {
-        double[][] tmpE = this.energies;
-        Picture tmpPic = this.pic;
-
-        this.energies = this.energiesT;
-        this.energiesT = tmpE;
-
-        this.pic = this.picT;
-        this.picT = tmpPic;
-    }
 
     // remove horizontal seam from current picture
     public void removeHorizontalSeam(int[] seam) {
-        if (seam == null) {
-            throw new IllegalArgumentException("null argument");
-        }
-        if (this.height() <= 1) {
-            throw new IllegalArgumentException("height already <= 1");
-        }
-
-        if (!inTranspose) {
-            turnTransposeOn();
-        }
-        if (seam.length != this.height()) {
-            throw new IllegalArgumentException("seam length is wrong");
-        }
-        validateSeam(seam); // must call after transpose since inside the function we compare width
-        removeVerticalSeam(seam);
-
-        System.out.println("before turn tsp off " + this.width() + " " + this.height());
-        turnTransposeOff();
-        System.out.println("after turn tsp off " + this.width() + " " + this.height());
-
+        removeSeam(seam, false);
     }
 
     public void removeVerticalSeam(int[] seam) {
+        removeSeam(seam, true);
+    }
+
+    private void removeSeam(int[] seam, boolean vertical) {
+
         if (seam == null) {
             throw new IllegalArgumentException("null argument");
         }
-        if (this.width() <= 1) {
-            throw new IllegalArgumentException("width already <= 1");
+        // get the picture ready
+        // System.out.println("Before condition w h: " + this.width() + " " + this.height());
+        if (vertical) {
+            if (inTranspose) turnTransposeOff();
+            // System.out.println("Calling Vertical");
         }
-        if (seam.length != this.height()) {
-            throw new IllegalArgumentException("seam length is wrong");
+        else {
+            if (!inTranspose) turnTransposeOn();
+            // System.out.println("Calling Horizontal");
         }
+        // System.out.println("after condition w h: " + this.width() + " " + this.height());
+
+        // check seam more
+        if (this.width() <= 1) throw new IllegalArgumentException("width already <= 1");
+        if (seam.length != this.height())
+            throw new IllegalArgumentException(
+                    "seam length is wrong " + seam.length + " expected " + this.height());
         validateSeam(seam);
 
-        // assert (!inTranspose);
         Picture newPic = new Picture(this.width() - 1, this.height());
 
         for (int row = 0; row < seam.length; row++) {
