@@ -14,8 +14,8 @@ public class SeamCarver {
             throw new IllegalArgumentException("null argument");
         }
         this.pic = new Picture(picture);
-        this.energies = new double[pic.width()][pic.height()];
-        this.computeEnergyAll();
+        this.energies = this.computeEnergyAll();
+
 
     }
 
@@ -47,6 +47,12 @@ public class SeamCarver {
 
     // compute energy of pixel at column x and row y
     private double computeEnergyPixel(int x, int y) {
+        if (x < 0 || x >= this.width()) {
+            throw new IllegalArgumentException("x outside range");
+        }
+        if (y < 0 || y >= this.height()) {
+            throw new IllegalArgumentException("y outside range");
+        }
         // border
         if (x == 0 || x == (this.width() - 1) || y == 0 || y == (this.height() - 1)) {
             return 1000;
@@ -74,12 +80,14 @@ public class SeamCarver {
     }
 
     // compute energy of at all pixels
-    private void computeEnergyAll() {
+    private double[][] computeEnergyAll() {
+        double[][] e = new double[this.width()][this.height()];
         for (int col = 0; col < this.width(); col++) { // will col in inner loop faster
             for (int row = 0; row < this.height(); row++) {
-                this.energies[col][row] = computeEnergyPixel(col, row);
+                e[col][row] = computeEnergyPixel(col, row);
             }
         }
+        return e;
     }
 
     public int[] findVerticalSeam() {
@@ -241,19 +249,22 @@ public class SeamCarver {
 
         this.pic = newPic;
 
-        // shift array
-        for (int row = 0; row < seam.length; row++) {
-            for (int col = seam[row]; col < (this.width() - 1); col++) {
-                this.energies[col][row] = this.energies[col + 1][row];
-            }
-        }
-
-        // recalculate energy left and right of the seam
-        for (int row = 0; row < seam.length; row++) {
-            // lhs of old seam
-            computeEnergyPixel(seam[row] - 1, row);
-            // rhs of old seam
-            computeEnergyPixel(seam[row], row);
+        // // shift array
+        // for (int row = 0; row < seam.length; row++) {
+        //     for (int col = seam[row]; col < (this.width() - 1); col++) {
+        //         this.energies[col][row] = this.energies[col + 1][row];
+        //     }
+        // }
+        //
+        // // recalculate energy left and right of the seam
+        // for (int row = 0; row < seam.length; row++) {
+        //     // lhs of old seam
+        //     computeEnergyPixel(seam[row] - 1, row);
+        //     // rhs of old seam
+        //     computeEnergyPixel(seam[row], row);
+        // }
+        if (!vertical) {
+            turnTransposeOff();
         }
     }
 
