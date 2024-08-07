@@ -11,7 +11,10 @@ public class SeamCarver {
 
     // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
-        this.pic = picture;
+        if (picture == null) {
+            throw new IllegalArgumentException("null argument");
+        }
+        this.pic = new Picture(picture);
         this.energies = new double[pic.width()][pic.height()];
         this.computeEnergyAll();
 
@@ -34,6 +37,12 @@ public class SeamCarver {
 
     // get energy of pixel at column x and row y
     public double energy(int x, int y) {
+        if (x < 0 || x >= this.width()) {
+            throw new IllegalArgumentException("x outside range");
+        }
+        if (y < 0 || y >= this.height()) {
+            throw new IllegalArgumentException("y outside range");
+        }
         return this.energies[x][y];
     }
 
@@ -139,53 +148,6 @@ public class SeamCarver {
         return minESeam;
     }
 
-    // private void relax(int col, int row, double[][] eTo, int[][] colTo) {
-    //     if (col == 0) { // left edge
-    //         double e1 = energy(col, row + 1) + eTo[col][row];
-    //         double e2 = energy(col + 1, row + 1) + eTo[col][row];
-    //
-    //         if (e1 < eTo[col][row + 1]) {
-    //             eTo[col][row + 1] = e1;
-    //             colTo[col][row + 1] = col;
-    //         }
-    //         if (e2 < eTo[col + 1][row + 1]) {
-    //             eTo[col + 1][row + 1] = e2;
-    //             colTo[col + 1][row + 1] = col;
-    //         }
-    //     }
-    //     else if (col == (this.width() - 1)) { // right edge
-    //         double e1 = energy(col - 1, row + 1) + eTo[col][row];
-    //         double e2 = energy(col, row + 1) + eTo[col][row];
-    //
-    //         if (e1 < eTo[col - 1][row + 1]) {
-    //             eTo[col - 1][row + 1] = e1;
-    //             colTo[col - 1][row + 1] = col;
-    //         }
-    //         if (e2 < eTo[col][row + 1]) {
-    //             eTo[col][row + 1] = e2;
-    //             colTo[col][row + 1] = col;
-    //         }
-    //     }
-    //     else {
-    //         double e1 = energy(col - 1, row + 1) + eTo[col][row];
-    //         double e2 = energy(col, row + 1) + eTo[col][row];
-    //         double e3 = energy(col + 1, row + 1) + eTo[col][row];
-    //
-    //         if (e1 < eTo[col - 1][row + 1]) {
-    //             eTo[col - 1][row + 1] = e1;
-    //             colTo[col - 1][row + 1] = col;
-    //         }
-    //         if (e2 < eTo[col][row + 1]) {
-    //             eTo[col][row + 1] = e2;
-    //             colTo[col][row + 1] = col;
-    //         }
-    //         if (e3 < eTo[col + 1][row + 1]) {
-    //             eTo[col + 1][row + 1] = e3;
-    //             colTo[col + 1][row + 1] = col;
-    //         }
-    //     }
-    // }
-
     private Picture getPicTranspose(Picture picture) {
         Picture pictureT = new Picture(picture.height(), picture.width());
         for (int col = 0; col < picture.width(); col++) {
@@ -244,15 +206,56 @@ public class SeamCarver {
 
     // remove horizontal seam from current picture
     public void removeHorizontalSeam(int[] seam) {
+        if (seam == null) {
+            throw new IllegalArgumentException("null argument");
+        }
+        if (this.height() <= 1) {
+            throw new IllegalArgumentException("height already <= 1");
+        }
+
         if (!inTranspose) {
             turnTransposeOn();
         }
+        if (seam.length != this.height()) {
+            throw new IllegalArgumentException("seam length is wrong");
+        }
+        validateSeam(seam); // must call after transpose since inside the function we compare width
         removeVerticalSeam(seam);
+
+        System.out.println("before turn tsp off " + this.width() + " " + this.height());
         turnTransposeOff();
+        System.out.println("after turn tsp off " + this.width() + " " + this.height());
+
     }
 
     public void removeVerticalSeam(int[] seam) {
-        assert (!inTranspose);
+        if (seam == null) {
+            throw new IllegalArgumentException("null argument");
+        }
+        if (this.width() <= 1) {
+            throw new IllegalArgumentException("width already <= 1");
+        }
+        if (seam.length != this.height()) {
+            throw new IllegalArgumentException("seam length is wrong");
+        }
+        validateSeam(seam);
+
+        // assert (!inTranspose);
+        Picture newPic = new Picture(this.width() - 1, this.height());
+
+        for (int row = 0; row < seam.length; row++) {
+            for (int col = 0; col < this.width(); col++) {
+                if (col < seam[row]) {
+                    newPic.setRGB(col, row, this.pic.getRGB(col, row));
+                }
+                else if (col > seam[row]) {
+                    newPic.setRGB(col - 1, row, this.pic.getRGB(col, row));
+                }
+            }
+        }
+
+        this.pic = newPic;
+
         // shift array
         for (int row = 0; row < seam.length; row++) {
             for (int col = seam[row]; col < (this.width() - 1); col++) {
@@ -266,6 +269,19 @@ public class SeamCarver {
             computeEnergyPixel(seam[row] - 1, row);
             // rhs of old seam
             computeEnergyPixel(seam[row], row);
+        }
+    }
+
+    private void validateSeam(int[] seam) {
+        for (int i = 0; i < (seam.length - 1); i++) {
+            if (Math.abs(seam[i + 1] - seam[i]) > 1) {
+                throw new IllegalArgumentException("invalid seam");
+            }
+        }
+        for (int i = 0; i < seam.length; i++) {
+            if (seam[i] < 0 || seam[i] >= this.width()) {
+                throw new IllegalArgumentException("invalid seam");
+            }
         }
     }
 
