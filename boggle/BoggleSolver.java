@@ -15,102 +15,86 @@ public class BoggleSolver {
         for (String s : dictionary) {
             tries.put(s, s.length());
         }
-
     }
 
     // Returns the set of all valid words in the given Boggle board, as an Iterable.
     public Iterable<String> getAllValidWords(BoggleBoard board) {
         int nrow = board.rows();
         int ncol = board.cols();
-        boolean[] marked = new boolean[nrow * ncol];
         HashSet<String> acc = new HashSet<String>();
+
 
         for (int i = 0; i < nrow; i++) {
             for (int j = 0; j < ncol; j++) {
-                marked[i * ncol + j] = false;
-            }
-        }
-        for (int i = 0; i < nrow; i++) {
-            for (int j = 0; j < ncol; j++) {
-                char c = board.getLetter(i, j);
-                dfs(Character.toString(c), i, j, marked, board, acc);
+                boolean[] marked = getNewAllocatedMarked(nrow, ncol);
+                dfs("", i, j, marked, board, acc);
             }
         }
         return acc;
     }
 
-    // dfs and add the valid word as you find it, stop otherwise
-    private void dfs(String s, int row, int col, boolean[] marked, BoggleBoard board,
-                     HashSet<String> acc) {
-        // System.out.println("Exploring: " + s);
-        marked[row * board.cols() + col] = true;
-        if (s.length() <= 2) { // down more
-            if (row > 0) { // above
-                boolean[] m1 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row - 1, col), row - 1, col, m1, board, acc);
-            }
-            if (row < board.rows() - 1) { // below
-                boolean[] m2 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row + 1, col), row + 1, col, m2, board, acc);
-            }
-            if (col > 0) { // left
-                boolean[] m3 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row, col - 1), row, col - 1, m3, board, acc);
-            }
-            if (col < board.cols() - 1) { // right
-                boolean[] m4 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row, col + 1), row, col + 1, m4, board, acc);
-            }
-            if (row > 0 && col > 0) { // upper-left corner
-                boolean[] m5 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row - 1, col - 1), row - 1, col - 1, m5, board, acc);
-            }
-            if (row < board.rows() - 1 && col > 0) { // lower-left corner
-                boolean[] m6 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row + 1, col - 1), row + 1, col - 1, m6, board, acc);
-            }
-            if (row > 0 && col < board.cols() - 1) { // upper-right corner
-                boolean[] m7 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row - 1, col + 1), row - 1, col + 1, m7, board, acc);
-            }
-            if (row < board.rows() - 1 && col < board.cols() - 1) { // lower-right corner
-                boolean[] m8 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row + 1, col + 1), row + 1, col + 1, m8, board, acc);
+    private boolean[] getNewAllocatedMarked(int nrow, int ncol) {
+        boolean[] marked = new boolean[nrow * ncol]; // new marked for every new first char
+        for (int ir = 0; ir < nrow; ir++) {
+            for (int ic = 0; ic < ncol; ic++) {
+                marked[ir * ncol + ic] = false;
             }
         }
-        else if (this.tries.contains(s)) { // length > 2
+        return marked;
+    }
+
+    // dfs and add the valid word as you find it, stop otherwise
+    private void dfs(String orig, int i, int j, boolean[] marked, BoggleBoard board,
+                     HashSet<String> acc) {
+        // System.out.println("Exploring: " + s);
+        int r = board.rows();
+        int c = board.cols();
+        String s = orig + board.getLetter(i, j);
+        marked[i * c + j] = true;
+        boolean doDFS = false;
+
+        if (s.length() <= 2) { // down more
+            doDFS = true;
+        }
+        else if (this.tries.keysWithPrefix(s) != null) { // length > 2
             acc.add(s);
-            if (row > 0) { // above
+            doDFS = true;
+        }
+        // if (i == r - 1 && j == c - 1) System.out.println("dsf: " + s);
+
+        if (doDFS) {
+            // System.out.println("dsf: " + s);
+            if (i > 0 && !marked[(i - 1) * c + j]) { // above
                 boolean[] m1 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row - 1, col), row - 1, col, m1, board, acc);
+                dfs(s, i - 1, j, m1, board, acc);
             }
-            if (row < board.rows() - 1) { // below
+            if (i < r - 1 && !marked[(i + 1) * c + j]) { // below
                 boolean[] m2 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row + 1, col), row + 1, col, m2, board, acc);
+                dfs(s, i + 1, j, m2, board, acc);
             }
-            if (col > 0) { // left
+            if (j > 0 && !marked[i * c + j - 1]) { // left
                 boolean[] m3 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row, col - 1), row, col - 1, m3, board, acc);
+                dfs(s, i, j - 1, m3, board, acc);
             }
-            if (col < board.cols() - 1) { // right
+            if (j < c - 1 && !marked[i * c + j + 1]) { // right
                 boolean[] m4 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row, col + 1), row, col + 1, m4, board, acc);
+                dfs(s, i, j + 1, m4, board, acc);
             }
-            if (row > 0 && col > 0) { // upper-left corner
+            if (i > 0 && j > 0 && !marked[(i - 1) * c + j - 1]) { // upper-left corner
                 boolean[] m5 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row - 1, col - 1), row - 1, col - 1, m5, board, acc);
+                dfs(s, i - 1, j - 1, m5, board, acc);
             }
-            if (row < board.rows() - 1 && col > 0) { // lower-left corner
+            if (i < r - 1 && j > 0 && !marked[(i + 1) * c + j - 1]) { // lower-left corner
                 boolean[] m6 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row + 1, col - 1), row + 1, col - 1, m6, board, acc);
+                dfs(s, i + 1, j - 1, m6, board, acc);
             }
-            if (row > 0 && col < board.cols() - 1) { // upper-right corner
+            if (i > 0 && j < c - 1 && !marked[(i - 1) * c + j + 1]) { // upper-right corner
                 boolean[] m7 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row - 1, col + 1), row - 1, col + 1, m7, board, acc);
+                dfs(s, i - 1, j + 1, m7, board, acc);
             }
-            if (row < board.rows() - 1 && col < board.cols() - 1) { // lower-right corner
+            if (i < r - 1 && j < c - 1 && !marked[(i + 1) * c + j + 1]) { // lower-right corner
                 boolean[] m8 = Arrays.copyOf(marked, marked.length);
-                dfs(s + board.getLetter(row + 1, col + 1), row + 1, col + 1, m8, board, acc);
+                dfs(s, i + 1, j + 1, m8, board, acc);
             }
         } // stop dfs otherwise (prefix no longer matches)
     }
@@ -153,7 +137,7 @@ public class BoggleSolver {
         BoggleBoard board = new BoggleBoard(args[1]);
         int score = 0;
         for (String word : solver.getAllValidWords(board)) {
-            StdOut.println(word);
+            // StdOut.println(word);
             score += solver.scoreOf(word);
         }
         StdOut.println("Score = " + score);
