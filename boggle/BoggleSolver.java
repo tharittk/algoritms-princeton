@@ -7,9 +7,10 @@ import java.util.HashSet;
 public class BoggleSolver {
     // Initializes the data structure using the given array of strings as the dictionary.
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
-    private CustomTST<Integer> tries;
+    private final CustomTST<Integer> tries;
 
     public BoggleSolver(String[] dictionary) {
+        if (dictionary == null) throw new IllegalArgumentException("Empty dictionary");
         tries = new CustomTST<Integer>();
         for (String s : dictionary) {
             tries.put(s, s.length());
@@ -18,6 +19,7 @@ public class BoggleSolver {
 
     // Returns the set of all valid words in the given Boggle board, as an Iterable.
     public Iterable<String> getAllValidWords(BoggleBoard board) {
+        if (board == null) throw new IllegalArgumentException("Empty board !");
         int nrow = board.rows();
         int ncol = board.cols();
         HashSet<String> acc = new HashSet<String>();
@@ -48,15 +50,21 @@ public class BoggleSolver {
         // System.out.println("Exploring: " + s);
         int r = board.rows();
         int c = board.cols();
-        String s = orig + board.getLetter(i, j);
         marked[i * c + j] = true;
         boolean doDFS = false;
+        char ch = board.getLetter(i, j);
+        String s = orig + ch;
+        if (ch == 'Q') {
+            s = s + 'U';
+            // System.out.println(s);
+        }
 
         if (s.length() <= 2) { // down more
             doDFS = true;
         }
         else if (this.tries.isPrefixOfAnyWord(s)) { // length > 2
-            acc.add(s);
+
+            if (this.tries.contains(s)) acc.add(s);
             doDFS = true;
         }
         // if (i == r - 1 && j == c - 1) System.out.println("dsf: " + s);
@@ -101,9 +109,11 @@ public class BoggleSolver {
     // Returns the score of the given word if it is in the dictionary, zero otherwise.
     // (You can assume the word contains only the uppercase letters A through Z.)
     public int scoreOf(String word) {
+        if (word == null) throw new IllegalArgumentException("NULL word");
         if (tries.contains(word)) {
             int length = word.length();
             int points;
+            if (length < 3) return 2;
             switch (length) {
                 case 3:
                     points = 1;
@@ -135,11 +145,15 @@ public class BoggleSolver {
         BoggleSolver solver = new BoggleSolver(dictionary);
         BoggleBoard board = new BoggleBoard(args[1]);
         int score = 0;
+        int count = 0;
         for (String word : solver.getAllValidWords(board)) {
             // StdOut.println(word);
             score += solver.scoreOf(word);
+            count++;
         }
         StdOut.println("Score = " + score);
+        StdOut.println("Total word = " + count);
+
     }
 
     // Customized Trie - https://algs4.cs.princeton.edu/52trie/TST.java.html
@@ -158,7 +172,6 @@ public class BoggleSolver {
          */
         public CustomTST() {
         }
-
 
         /**
          * Does this symbol table contain the given key?
@@ -243,20 +256,20 @@ public class BoggleSolver {
             }
             if (prefix.length() == 0)
                 throw new IllegalArgumentException("prefix must have length >= 1");
-            Node<Value> x = isPrefixOfAnyWord(root, prefix, 0);
+            Node<Value> x = nodePrefixTerminate(root, prefix, 0);
             if (x == null) return false;
             return true;
         }
 
         // check if the given prefix is a prefix of any word in trie
-        private Node<Value> isPrefixOfAnyWord(Node<Value> x, String prefix, int d) {
+        private Node<Value> nodePrefixTerminate(Node<Value> x, String prefix, int d) {
             if (x == null) return null;
             if (prefix.length() == 0)
                 throw new IllegalArgumentException("prefix must have length >= 1");
             char c = prefix.charAt(d);
-            if (c < x.c) return isPrefixOfAnyWord(x.left, prefix, d);
-            else if (c > x.c) return isPrefixOfAnyWord(x.right, prefix, d);
-            else if (d < prefix.length() - 1) return get(x.mid, prefix, d + 1);
+            if (c < x.c) return nodePrefixTerminate(x.left, prefix, d);
+            else if (c > x.c) return nodePrefixTerminate(x.right, prefix, d);
+            else if (d < prefix.length() - 1) return nodePrefixTerminate(x.mid, prefix, d + 1);
             else return x;
         }
 
