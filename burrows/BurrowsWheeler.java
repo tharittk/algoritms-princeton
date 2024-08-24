@@ -4,11 +4,19 @@ import edu.princeton.cs.algs4.BinaryStdOut;
 import java.util.ArrayList;
 
 public class BurrowsWheeler {
+    private static CircularSuffixArray csa;
+    private static String s;
+    private static final int N_ASCII = 256;
+
     public static void transform() {
-        String s = BinaryStdIn.readString();
-        CircularSuffixArray csa = new CircularSuffixArray(s);
-        StringBuilder t = new StringBuilder();
+        s = BinaryStdIn.readString();
+        csa = new CircularSuffixArray(s);
+        writeFirstIndexAndLastColumnOfSortSuffixArray();
+    }
+
+    private static void writeFirstIndexAndLastColumnOfSortSuffixArray() {
         int first;
+        StringBuilder t = new StringBuilder();
 
         for (int i = 0; i < csa.length(); i++) {
             int idxi = csa.index(i);
@@ -20,7 +28,6 @@ public class BurrowsWheeler {
             else {
                 t.append(s.charAt(idxi - 1));
             }
-
         }
         BinaryStdOut.write(t.toString());
         BinaryStdOut.close();
@@ -30,74 +37,89 @@ public class BurrowsWheeler {
         int first = BinaryStdIn.readInt();
         String t = BinaryStdIn.readString();
 
-        char[] tSorted = new char[t.length()];
+        int[] count = new int[N_ASCII + 1];
+        int[] next = new int[t.length()];
 
-        // building next
-        int nAscii = 256; // extended ASCII
-        int nChar = t.length();
-        int[] count = new int[nAscii + 1];
-        int[] next = new int[nChar];
+        ArrayList<ArrayList<Integer>> charPositionLists = initializeCharacterPositionsLists();
 
+        countCharFrequencyAndStorePositions(t, count, charPositionLists);
+
+        turnDiscreteCountToAccumulate(count);
+
+        char[] tSorted = getSortedCharOfString(t, count);
+
+        buildNextArray(next, charPositionLists);
+
+        invertForOriginalText(first, next, tSorted);
+    }
+
+
+    private static ArrayList<ArrayList<Integer>> initializeCharacterPositionsLists() {
         ArrayList<ArrayList<Integer>> charPositionLists = new ArrayList<ArrayList<Integer>>();
-        for (int i = 0; i < nAscii + 1; i++) {
+        for (int i = 0; i < N_ASCII + 1; i++) {
             charPositionLists.add(new ArrayList<Integer>());
         }
+        return charPositionLists;
+    }
 
-        // count frequency and store the list of index in t where char is found
-        for (int i = 0; i < nChar; i++) {
+    private static void countCharFrequencyAndStorePositions(String t, int[] count,
+                                                            ArrayList<ArrayList<Integer>> charPositionLists) {
+        for (int i = 0; i < t.length(); i++) {
             int c = t.charAt(i);
             count[c + 1]++;
             charPositionLists.get(c + 1).add(i);
-            // System.out.println("char: " + c + " adding position" + i);
-
         }
+    }
 
-        for (int r = 0; r < nAscii; r++) {
+    private static void turnDiscreteCountToAccumulate(int[] count) {
+        for (int r = 0; r < N_ASCII; r++) {
             count[r + 1] += count[r];
         }
+    }
 
-        for (int i = 0; i < nChar; i++) {
+    private static char[] getSortedCharOfString(String t, int[] count) {
+        char[] tSorted = new char[t.length()];
+        for (int i = 0; i < t.length(); i++) {
             tSorted[count[t.charAt(i)]++] = t.charAt(i);
         }
+        return tSorted;
+    }
 
-        // building next
+    private static void buildNextArray(int[] next,
+                                       ArrayList<ArrayList<Integer>> charPositionLists) {
         int i = 0;
         for (ArrayList<Integer> positions : charPositionLists) {
             for (int position : positions) {
                 next[i] = position;
-                // System.out.println("i: " + i + " next[i]:: " + next[i]);
                 i++;
             }
         }
+    }
 
-        // inverting
+    private static void invertForOriginalText(int first, int[] next, char[] tSorted) {
         StringBuilder it = new StringBuilder();
         int j = first;
         // There's some kind of bug in stars.txt where next[first] = first
         // so only 1 star is retrieved
         if (next[first] == first) {
-            for (int k = 0; k < nChar; k++) {
+            for (int k = 0; k < tSorted.length; k++) {
                 it.append(tSorted[k]);
             }
         }
         else {
             while (next[j] != first) {
-                // System.out.println("here: " + next[j]);
                 it.append(tSorted[j]);
                 j = next[j];
             }
-            it.append(tSorted[j]); // last elem
+            it.append(tSorted[j]); // last character
         }
-
         BinaryStdOut.write(it.toString());
         BinaryStdOut.close();
     }
-
 
     public static void main(String[] args) {
         if (args[0].equals("-")) transform();
         else if (args[0].equals("+")) inverseTransform();
     }
-
 }
 

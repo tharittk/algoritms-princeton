@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class CircularSuffixArray {
     private final String s;
-    private CircularSuffix[] csArray;
+    private final CircularSuffix[] csArray;
 
     public CircularSuffixArray(String s) {
         if (s == null) throw new IllegalArgumentException("null string input !");
@@ -15,13 +15,8 @@ public class CircularSuffixArray {
         for (int i = 0; i < s.length(); i++) {
             csArray[i] = new CircularSuffix(i, s);
         }
-        // for (int i = 0; i < s.length(); i++) {
-        //     System.out.println("first char " + i + ": " + csArray[i].s.charAt(csArray[i].pos));
-        // }
+
         Arrays.sort(csArray);
-        // for (int i = 0; i < s.length(); i++) {
-        //     System.out.println("srt first char " + i + ": " + csArray[i].s.charAt(csArray[i].pos));
-        // }
     }
 
     private class CircularSuffix implements Comparable<CircularSuffix> {
@@ -36,8 +31,8 @@ public class CircularSuffixArray {
         }
 
         public int compareTo(CircularSuffix other) {
+            // exactly same suffix
             if (this.offset == s.length() && other.offset == s.length()) {
-                // exactly same suffix
                 this.offset = 0;
                 other.offset = 0;
                 return 0;
@@ -45,9 +40,7 @@ public class CircularSuffixArray {
 
             int cmp = Character.compare(this.s.charAt((this.pos + this.offset) % s.length()),
                                         other.s.charAt((other.pos + other.offset) % s.length()));
-
             if (cmp == 0) {
-                // recursively compare next character
                 this.offset++;
                 other.offset++;
                 return compareTo(other);
@@ -59,7 +52,6 @@ public class CircularSuffixArray {
             }
         }
     }
-
 
     public int length() {
         return s.length();
